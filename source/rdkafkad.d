@@ -509,33 +509,6 @@ alias ConsumeCb = void delegate(ref Message message) nothrow @nogc;
 * in performing other operations along with the assinging/revocation,
 * such as fetching offsets from an alternate location (on assign)
 * or manually committing offsets (on revoke).
-*
-* The following example show's the application's responsibilities:
-* @code
-*    class MyRebalanceCb : public RebalanceCb {
-*      void rebalance_cb (KafkaConsumer *consumer,
-*             ErrorCode err,
-*                  std::vector<TopicPartition*> &partitions) {
-*         if (err == ASSIGN_PARTITIONS) {
-*           // application may load offets from arbitrary external
-*           // storage here and update \p partitions
-*
-*           consumer.assign(partitions);
-*
-*         } else if (err == REVOKE_PARTITIONS) {
-*           // Application may commit offsets manually here
-*           // if auto.commit.enable=false
-*
-*           consumer.unassign();
-*
-*         } else {
-*           std::cerr << "Rebalancing error: <<
-*                        err2str(err) << std::endl;
-*           consumer.unassign();
-*         }
-*     }
-*  }
-* @endcode
 */
 alias RebalanceCb = void delegate(KafkaConsumer consumer, ErrorCode err,
     ref TopicPartition[] partitions) nothrow @nogc;
@@ -931,11 +904,11 @@ nothrow @nogc:
     *
     * ERR_NO_ERROR on success or an error code on failure.
     */
-    ErrorCode query_watermark_offsets(const(char)* topic, int partition,
-        long* low, long* high, int timeout_ms)
+    ErrorCode queryWatermarkOffsets(const(char)* topic, int partition,
+        ref long low, ref long high, int timeout_ms)
     {
         return cast(ErrorCode) rd_kafka_query_watermark_offsets(rk_, topic,
-            partition, low, high, timeout_ms);
+            partition, &low, &high, timeout_ms);
     }
 
     private rd_kafka_t* rk_;
@@ -975,7 +948,7 @@ nothrow @nogc:
     * Note:  An application should make sure to call poll() at regular
     *          intervals to serve any queued callbacks waiting to be called.
     *
-    * @warning This method MUST NOT be used with the KafkaConsumer,
+    * Warning: This method MUST NOT be used with the KafkaConsumer,
     *          use its consume() instead.
     *
     * the number of events served.
@@ -1452,7 +1425,7 @@ nothrow @nogc:
 
     /**
    * true if \p partition is available for the topic (has leader).
-   * @warning \b MUST \b ONLY be called from within a
+   * Warning: \b MUST \b ONLY be called from within a
    *          PartitionerCb callback.
    */
     bool partitionAvailable(int partition) const
@@ -1635,7 +1608,7 @@ nothrow @nogc:
     const(void)* msgOpaque() const
     {
         return rkmessage_._private;
-    };
+    }
 
 private:
     Topic topic_;
@@ -1776,7 +1749,7 @@ class KafkaConsumer : Handle
 
 nothrow @nogc:
 
-    /**
+  /**
    * Update the subscription set to \p topics.
    *
    * Any previous subscription will be unassigned and  unsubscribed first.
@@ -1845,7 +1818,7 @@ nothrow @nogc:
    *  - timeout due to no message or event in \p timeout_ms
    *    (Message::err() is TIMED_OUT)
    */
-    nothrow @nogc void consume(int timeout_ms, out Message msg)
+    nothrow @nogc void consume(int timeout_ms, ref Message msg)
     {
         rd_kafka_message_t* rkmessage;
 
@@ -1855,7 +1828,6 @@ nothrow @nogc:
             msg = Message(null, ErrorCode._TIMED_OUT);
 
         msg = Message(rkmessage);
-
     }
 
     /**
@@ -1880,7 +1852,7 @@ nothrow @nogc:
     /**
    * Stop consumption and remove the current assignment.
    */
-    nothrow @nogc ErrorCode unassign()
+    ErrorCode unassign()
     {
         return cast(ErrorCode) rd_kafka_assign(rk_, null);
     }
@@ -1897,7 +1869,7 @@ nothrow @nogc:
    *
    * ERR_NO_ERROR or error code.
    */
-    nothrow @nogc ErrorCode commitSync()
+    ErrorCode commitSync()
     {
         return cast(ErrorCode) rd_kafka_commit(rk_, null, 0 /*sync*/ );
 
@@ -1908,7 +1880,7 @@ nothrow @nogc:
    *
    * See_also: KafkaConsummer::commitSync()
    */
-    nothrow @nogc ErrorCode commitAsync()
+    ErrorCode commitAsync()
     {
         return cast(ErrorCode) rd_kafka_commit(rk_, null, 1 /*async*/ );
     }
@@ -1920,7 +1892,7 @@ nothrow @nogc:
    *
    * See_also: KafkaConsummer::commitSync()
    */
-    nothrow @nogc ErrorCode commitSync(ref Message message)
+    ErrorCode commitSync(ref Message message)
     {
         return cast(ErrorCode) rd_kafka_commit_message(rk_, message.rkmessage_, 0 /*sync*/ );
     }
@@ -1932,7 +1904,7 @@ nothrow @nogc:
    *
    * See_also: KafkaConsummer::commitSync()
    */
-    nothrow @nogc ErrorCode commitAsync(ref Message message)
+    ErrorCode commitAsync(ref Message message)
     {
         return cast(ErrorCode) rd_kafka_commit_message(rk_, message.rkmessage_, 1 /*async*/ );
     }
@@ -2181,7 +2153,7 @@ static:
    *  - TIMED_OUT - \p timeout_ms was reached with no new messages fetched.
    *  - PARTITION_EOF - End of partition reached, not an error.
    */
-    void consume(Topic topic, int partition, int timeout_ms, out Message msg)
+    void consume(Topic topic, int partition, int timeout_ms, ref Message msg)
     {
         rd_kafka_message_t* rkmessage;
 
@@ -2213,7 +2185,7 @@ static:
    * errors, so applications should check that it isn't null before
    * dereferencing it.
    */
-    void consume(Queue queue, int timeout_ms, out Message msg)
+    void consume(Queue queue, int timeout_ms, ref Message msg)
     {
         rd_kafka_message_t* rkmessage;
         rkmessage = rd_kafka_consume_queue(queue.queue_, timeout_ms);
@@ -2382,7 +2354,9 @@ nothrow @nogc:
      ~this()
     {
         if (rk_)
+        {
             rd_kafka_destroy(rk_);
+        }
     }
 
     private static void dr_msg_cb_trampoline(rd_kafka_t* rk,
@@ -2399,33 +2373,29 @@ nothrow @nogc:
    *
    * These flags are optional and mutually exclusive.
    */
-    enum int RK_MSG_FREE = 0x1; /**< rdkafka will free(3) \p payload
-                                        * when it is done with it. */
-    enum int RK_MSG_COPY = 0x2; /**< the \p payload data will be copied
-                                       * and the \p payload pointer will not
-                                       * be used by rdkafka after the
-                                       * call returns. */
-    enum int RK_MSG_BLOCK = 0x4; /**< Block produce*() on message queue
-          *   full.
-          *   WARNING:
-          *   If a delivery report callback
-          *   is used the application MUST
-          *   call rd_kafka_poll() (or equiv.)
-          *   to make sure delivered messages
-          *   are drained from the internal
-          *   delivery report queue.
-          *   Failure to do so will result
-          *   in indefinately blocking on
-          *   the produce() call when the
-          *   message queue is full.
-          */
-
-    /* For backwards compatibility: */
-    static if (!is(typeof(MSG_COPY))) /* defined in sys/msg.h */
-    {
-        enum int MSG_FREE = RK_MSG_FREE;
-        enum int MSG_COPY = RK_MSG_COPY;
-    }
+   enum Msg
+   {
+        FREE = 0x1, /**< rdkafka will free(3) \p payload
+                                            * when it is done with it. */
+        COPY = 0x2, /**< the \p payload data will be copied
+                                           * and the \p payload pointer will not
+                                           * be used by rdkafka after the
+                                           * call returns. */
+        BLOCK = 0x4, /**< Block produce*() on message queue
+              *   full.
+              *   WARNING:
+              *   If a delivery report callback
+              *   is used the application MUST
+              *   call rd_kafka_poll() (or equiv.)
+              *   to make sure delivered messages
+              *   are drained from the internal
+              *   delivery report queue.
+              *   Failure to do so will result
+              *   in indefinately blocking on
+              *   the produce() call when the
+              *   message queue is full.
+              */
+   }
 
     /**
    * Produce and send a single message to broker.
@@ -2481,19 +2451,13 @@ nothrow @nogc:
    *
    *  - UNKNOWN_TOPIC     - topic is unknown in the Kafka cluster.
    */
-    /**
-   * Variant produce() that passes the key as a pointer and length
-   *        instead of as a const(char)[] *.
-   */
-    ErrorCode produce(Topic topic, int partition, int msgflags, void[] payload,
-        const(char)[] key, void* msg_opaque)
+    ErrorCode produce(Topic topic, int partition, void[] payload,
+        const(char)[] key, int msgflags = Msg.COPY, void* msg_opaque = null)
     {
         if (rd_kafka_produce(topic.rkt_, partition, msgflags, payload.ptr,
                 payload.length, key.ptr, key.length, msg_opaque) == -1)
             return cast(ErrorCode) rd_kafka_errno2err(errno);
-
         return ErrorCode.NO_ERROR;
-
     }
 
     /**
@@ -2601,7 +2565,7 @@ const @property nothrow @nogc:
     }
 
     /** In-Sync-Replica brokers
-   *  @warning The broker may return a cached/outdated list of ISRs.
+   *  Warning: The broker may return a cached/outdated list of ISRs.
    */
     auto isrs()
     {
