@@ -314,7 +314,7 @@ alias DeliveryReportCb = void delegate(ref Message message) nothrow @nogc;
    * See_also: The callback may use Topic::partition_available() to check
    *     if a partition has an active leader broker.
    */
-alias PartitionerCb = int delegate(const Topic topic, const(char)[] key,
+alias PartitionerCb = int delegate(const Topic topic, const(void)[] key,
     int partition_cnt, void* msg_opaque) nothrow @nogc;
 
 /**
@@ -1583,7 +1583,7 @@ nothrow @nogc:
     }
 
     /** Message key as string (if applicable) */
-    const(char)[] key() const
+    const(void)[] key() const
     {
         return (cast(const(char)*) rkmessage_.key)[0 .. rkmessage_.key_len];
     }
@@ -2452,7 +2452,7 @@ nothrow @nogc:
    *  - UNKNOWN_TOPIC     - topic is unknown in the Kafka cluster.
    */
     ErrorCode produce(Topic topic, int partition, void[] payload,
-        const(char)[] key, int msgflags = Msg.COPY, void* msg_opaque = null)
+        const(void)[] key = null, int msgflags = Msg.COPY, void* msg_opaque = null)
     {
         if (rd_kafka_produce(topic.rkt_, partition, msgflags, payload.ptr,
                 payload.length, key.ptr, key.length, msg_opaque) == -1)
