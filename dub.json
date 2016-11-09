@@ -1,11 +1,9 @@
 {
 	"name": "rdkafka-d",
 	"authors": [
-		"Ilya Yaroshenko (Converted from CPP wrapper)"
+		"Ilya Yaroshenko (Converted from the CPP wrapper)"
 	],
-	"dependencies": {
-		"librdkafka": "~>0.2.0"
-	},
+	"dependencies": {"librdkafka": "~>0.3.0"},
 	"description": "OOP wrapper for librdkafka",
 	"copyright": "Copyright © 2016, Tamedia AG",
 	"license": "BSL-1.0"

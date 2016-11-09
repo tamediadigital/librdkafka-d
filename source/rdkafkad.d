@@ -984,8 +984,7 @@ nothrow @nogc:
     * will be set), else TIMED_OUT on timeout or
     * other error code on error.
     */
-    ErrorCode metadata(bool all_topics, const Topic only_rkt, ref Metadata metadata,
-        int timeout_ms)
+    ErrorCode metadata(bool all_topics, const Topic only_rkt, ref Metadata metadata, int timeout_ms)
     {
         const rd_kafka_metadata_t* cmetadatap = null;
 
