@@ -44,7 +44,7 @@
  */
 module rdkafkad;
 
-import std.string: fromStringz, toStringz;
+import std.string : fromStringz, toStringz;
 import core.stdc.errno;
 import core.stdc.string;
 import core.stdc.stdlib;
@@ -109,7 +109,6 @@ int waitDestroyed(int timeout_ms) nothrow @nogc
     return rd_kafka_wait_destroyed(timeout_ms);
 }
 
-
 /**
  * Error codes.
  *
@@ -121,152 +120,152 @@ int waitDestroyed(int timeout_ms) nothrow @nogc
  *
  * @sa Use err2str() to translate an error code a human readable string
  */
-enum ErrorCode {
-  /* Internal errors to rdkafka: */
-  /** Begin internal error codes */
-  _BEGIN = -200,
-  /** Received message is incorrect */
-  _BAD_MSG = -199,
-  /** Bad/unknown compression */
-  _BAD_COMPRESSION = -198,
-  /** Broker is going away */
-  _DESTROY = -197,
-  /** Generic failure */
-  _FAIL = -196,
-  /** Broker transport failure */
-  _TRANSPORT = -195,
-  /** Critical system resource */
-  _CRIT_SYS_RESOURCE = -194,
-  /** Failed to resolve broker */
-  _RESOLVE = -193,
-  /** Produced message timed out*/
-  _MSG_TIMED_OUT = -192,
-  /** Reached the end of the topic+partition queue on
+enum ErrorCode
+{
+    /* Internal errors to rdkafka: */
+    /** Begin internal error codes */
+    _BEGIN = -200,
+    /** Received message is incorrect */
+    _BAD_MSG = -199,
+    /** Bad/unknown compression */
+    _BAD_COMPRESSION = -198,
+    /** Broker is going away */
+    _DESTROY = -197,
+    /** Generic failure */
+    _FAIL = -196,
+    /** Broker transport failure */
+    _TRANSPORT = -195,
+    /** Critical system resource */
+    _CRIT_SYS_RESOURCE = -194,
+    /** Failed to resolve broker */
+    _RESOLVE = -193,
+    /** Produced message timed out*/
+    _MSG_TIMED_OUT = -192,
+    /** Reached the end of the topic+partition queue on
    * the broker. Not really an error. */
-  _PARTITION_EOF = -191,
-  /** Permanent: Partition does not exist in cluster. */
-  _UNKNOWN_PARTITION = -190,
-  /** File or filesystem error */
-  _FS = -189,
-   /** Permanent: Topic does not exist in cluster. */
-  _UNKNOWN_TOPIC = -188,
-  /** All broker connections are down. */
-  _ALL_BROKERS_DOWN = -187,
-  /** Invalid argument, or invalid configuration */
-  _INVALID_ARG = -186,
-  /** Operation timed out */
-  _TIMED_OUT = -185,
-  /** Queue is full */
-  _QUEUE_FULL = -184,
-  /** ISR count < required.acks */
-        _ISR_INSUFF = -183,
-  /** Broker node update */
-        _NODE_UPDATE = -182,
-  /** SSL error */
-  _SSL = -181,
-  /** Waiting for coordinator to become available. */
-        _WAIT_COORD = -180,
-  /** Unknown client group */
-        _UNKNOWN_GROUP = -179,
-  /** Operation in progress */
-        _IN_PROGRESS = -178,
-   /** Previous operation in progress, wait for it to finish. */
-        _PREV_IN_PROGRESS = -177,
-   /** This operation would interfere with an existing subscription */
-        _EXISTING_SUBSCRIPTION = -176,
-  /** Assigned partitions (rebalance_cb) */
-        _ASSIGN_PARTITIONS = -175,
-  /** Revoked partitions (rebalance_cb) */
-        _REVOKE_PARTITIONS = -174,
-  /** Conflicting use */
-        _CONFLICT = -173,
-  /** Wrong state */
-        _STATE = -172,
-  /** Unknown protocol */
-        _UNKNOWN_PROTOCOL = -171,
-  /** Not implemented */
-        _NOT_IMPLEMENTED = -170,
-  /** Authentication failure*/
-  _AUTHENTICATION = -169,
-  /** No stored offset */
-  _NO_OFFSET = -168,
-  /** Outdated */
-  _OUTDATED = -167,
-  /** Timed out in queue */
-  _TIMED_OUT_QUEUE = -166,
+    _PARTITION_EOF = -191,
+    /** Permanent: Partition does not exist in cluster. */
+    _UNKNOWN_PARTITION = -190,
+    /** File or filesystem error */
+    _FS = -189,
+    /** Permanent: Topic does not exist in cluster. */
+    _UNKNOWN_TOPIC = -188,
+    /** All broker connections are down. */
+    _ALL_BROKERS_DOWN = -187,
+    /** Invalid argument, or invalid configuration */
+    _INVALID_ARG = -186,
+    /** Operation timed out */
+    _TIMED_OUT = -185,
+    /** Queue is full */
+    _QUEUE_FULL = -184,
+    /** ISR count < required.acks */
+    _ISR_INSUFF = -183,
+    /** Broker node update */
+    _NODE_UPDATE = -182,
+    /** SSL error */
+    _SSL = -181,
+    /** Waiting for coordinator to become available. */
+    _WAIT_COORD = -180,
+    /** Unknown client group */
+    _UNKNOWN_GROUP = -179,
+    /** Operation in progress */
+    _IN_PROGRESS = -178,
+    /** Previous operation in progress, wait for it to finish. */
+    _PREV_IN_PROGRESS = -177,
+    /** This operation would interfere with an existing subscription */
+    _EXISTING_SUBSCRIPTION = -176,
+    /** Assigned partitions (rebalance_cb) */
+    _ASSIGN_PARTITIONS = -175,
+    /** Revoked partitions (rebalance_cb) */
+    _REVOKE_PARTITIONS = -174,
+    /** Conflicting use */
+    _CONFLICT = -173,
+    /** Wrong state */
+    _STATE = -172,
+    /** Unknown protocol */
+    _UNKNOWN_PROTOCOL = -171,
+    /** Not implemented */
+    _NOT_IMPLEMENTED = -170,
+    /** Authentication failure*/
+    _AUTHENTICATION = -169,
+    /** No stored offset */
+    _NO_OFFSET = -168,
+    /** Outdated */
+    _OUTDATED = -167,
+    /** Timed out in queue */
+    _TIMED_OUT_QUEUE = -166,
 
-  /** End internal error codes */
-  _END = -100,
+    /** End internal error codes */
+    _END = -100,
 
-  /* Kafka broker errors: */
-  /** Unknown broker error */
-  UNKNOWN = -1,
-  /** Success */
-  NO_ERROR,
-  /** Offset out of range */
-  OFFSET_OUT_OF_RANGE = 1,
-  /** Invalid message */
-  INVALID_MSG = 2,
-  /** Unknown topic or partition */
-  UNKNOWN_TOPIC_OR_PART = 3,
-  /** Invalid message size */
-  INVALID_MSG_SIZE = 4,
-  /** Leader not available */
-  LEADER_NOT_AVAILABLE = 5,
-  /** Not leader for partition */
-  NOT_LEADER_FOR_PARTITION = 6,
-  /** Request timed out */
-  REQUEST_TIMED_OUT = 7,
-  /** Broker not available */
-  BROKER_NOT_AVAILABLE = 8,
-  /** Replica not available */
-  REPLICA_NOT_AVAILABLE = 9,
-  /** Message size too large */
-  MSG_SIZE_TOO_LARGE = 10,
-  /** StaleControllerEpochCode */
-  STALE_CTRL_EPOCH = 11,
-  /** Offset metadata string too large */
-  OFFSET_METADATA_TOO_LARGE = 12,
-  /** Broker disconnected before response received */
-  NETWORK_EXCEPTION = 13,
-  /** Group coordinator load in progress */
-        GROUP_LOAD_IN_PROGRESS = 14,
-   /** Group coordinator not available */
-        GROUP_COORDINATOR_NOT_AVAILABLE = 15,
-  /** Not coordinator for group */
-        NOT_COORDINATOR_FOR_GROUP = 16,
-  /** Invalid topic */
-        TOPIC_EXCEPTION = 17,
-  /** Message batch larger than configured server segment size */
-        RECORD_LIST_TOO_LARGE = 18,
-  /** Not enough in-sync replicas */
-        NOT_ENOUGH_REPLICAS = 19,
-  /** Message(s) written to insufficient number of in-sync replicas */
-        NOT_ENOUGH_REPLICAS_AFTER_APPEND = 20,
-  /** Invalid required acks value */
-        INVALID_REQUIRED_ACKS = 21,
-  /** Specified group generation id is not valid */
-        ILLEGAL_GENERATION = 22,
-  /** Inconsistent group protocol */
-        INCONSISTENT_GROUP_PROTOCOL = 23,
-  /** Invalid group.id */
-  INVALID_GROUP_ID = 24,
-  /** Unknown member */
-        UNKNOWN_MEMBER_ID = 25,
-  /** Invalid session timeout */
-        INVALID_SESSION_TIMEOUT = 26,
-  /** Group rebalance in progress */
-  REBALANCE_IN_PROGRESS = 27,
-  /** Commit offset data size is not valid */
-        INVALID_COMMIT_OFFSET_SIZE = 28,
-  /** Topic authorization failed */
-        TOPIC_AUTHORIZATION_FAILED = 29,
-  /** Group authorization failed */
-  GROUP_AUTHORIZATION_FAILED = 30,
-  /** Cluster authorization failed */
-  CLUSTER_AUTHORIZATION_FAILED = 31
+    /* Kafka broker errors: */
+    /** Unknown broker error */
+    UNKNOWN = -1,
+    /** Success */
+    NO_ERROR,
+    /** Offset out of range */
+    OFFSET_OUT_OF_RANGE = 1,
+    /** Invalid message */
+    INVALID_MSG = 2,
+    /** Unknown topic or partition */
+    UNKNOWN_TOPIC_OR_PART = 3,
+    /** Invalid message size */
+    INVALID_MSG_SIZE = 4,
+    /** Leader not available */
+    LEADER_NOT_AVAILABLE = 5,
+    /** Not leader for partition */
+    NOT_LEADER_FOR_PARTITION = 6,
+    /** Request timed out */
+    REQUEST_TIMED_OUT = 7,
+    /** Broker not available */
+    BROKER_NOT_AVAILABLE = 8,
+    /** Replica not available */
+    REPLICA_NOT_AVAILABLE = 9,
+    /** Message size too large */
+    MSG_SIZE_TOO_LARGE = 10,
+    /** StaleControllerEpochCode */
+    STALE_CTRL_EPOCH = 11,
+    /** Offset metadata string too large */
+    OFFSET_METADATA_TOO_LARGE = 12,
+    /** Broker disconnected before response received */
+    NETWORK_EXCEPTION = 13,
+    /** Group coordinator load in progress */
+    GROUP_LOAD_IN_PROGRESS = 14,
+    /** Group coordinator not available */
+    GROUP_COORDINATOR_NOT_AVAILABLE = 15,
+    /** Not coordinator for group */
+    NOT_COORDINATOR_FOR_GROUP = 16,
+    /** Invalid topic */
+    TOPIC_EXCEPTION = 17,
+    /** Message batch larger than configured server segment size */
+    RECORD_LIST_TOO_LARGE = 18,
+    /** Not enough in-sync replicas */
+    NOT_ENOUGH_REPLICAS = 19,
+    /** Message(s) written to insufficient number of in-sync replicas */
+    NOT_ENOUGH_REPLICAS_AFTER_APPEND = 20,
+    /** Invalid required acks value */
+    INVALID_REQUIRED_ACKS = 21,
+    /** Specified group generation id is not valid */
+    ILLEGAL_GENERATION = 22,
+    /** Inconsistent group protocol */
+    INCONSISTENT_GROUP_PROTOCOL = 23,
+    /** Invalid group.id */
+    INVALID_GROUP_ID = 24,
+    /** Unknown member */
+    UNKNOWN_MEMBER_ID = 25,
+    /** Invalid session timeout */
+    INVALID_SESSION_TIMEOUT = 26,
+    /** Group rebalance in progress */
+    REBALANCE_IN_PROGRESS = 27,
+    /** Commit offset data size is not valid */
+    INVALID_COMMIT_OFFSET_SIZE = 28,
+    /** Topic authorization failed */
+    TOPIC_AUTHORIZATION_FAILED = 29,
+    /** Group authorization failed */
+    GROUP_AUTHORIZATION_FAILED = 30,
+    /** Cluster authorization failed */
+    CLUSTER_AUTHORIZATION_FAILED = 31
 }
-
 
 /**
  * @ Returns a human readable representation of a kafka error.
@@ -274,10 +273,8 @@ enum ErrorCode {
 
 const(char)[] err2str(ErrorCode err) nothrow @nogc
 {
-    return rd_kafka_err2str(cast(rd_kafka_resp_err_t)err).fromStringz;
+    return rd_kafka_err2str(cast(rd_kafka_resp_err_t) err).fromStringz;
 }
-
-
 
 /**
  * Delivery Report callback class
@@ -294,8 +291,7 @@ const(char)[] err2str(ErrorCode err) nothrow @nogc
  * serve queued delivery report callbacks.
 
  */
-alias DeliveryReportCb = void delegate (ref Message message) nothrow @nogc;
-
+alias DeliveryReportCb = void delegate(ref Message message) nothrow @nogc;
 
 /**
  * Partitioner callback class
@@ -304,7 +300,7 @@ alias DeliveryReportCb = void delegate (ref Message message) nothrow @nogc;
  *
  * @sa Conf::set() \c "partitioner_cb"
  */
-  /**
+/**
    * Partitioner callback
    *
    * Return the partition to use for \p key in \p topic.
@@ -320,21 +316,15 @@ alias DeliveryReportCb = void delegate (ref Message message) nothrow @nogc;
    * @sa The callback may use Topic::partition_available() to check
    *     if a partition has an active leader broker.
    */
-alias PartitionerCb = int delegate (const Topic topic,
-                                  const(char)[] key,
-                                  int partition_cnt,
-                                  void* msg_opaque) nothrow @nogc;
+alias PartitionerCb = int delegate(const Topic topic, const(char)[] key,
+    int partition_cnt, void* msg_opaque) nothrow @nogc;
 
 /**
  *  Variant partitioner with key pointer
  *
  */
-alias PartitionerKeyPointerCb = int delegate (const Topic topic,
-                                  const (void)* key,
-                                  size_t key_len,
-                                  int partition_cnt,
-                                  void* msg_opaque) nothrow @nogc;
-
+alias PartitionerKeyPointerCb = int delegate(const Topic topic, const(void)* key,
+    size_t key_len, int partition_cnt, void* msg_opaque) nothrow @nogc;
 
 /**
  * Event callback class
@@ -349,18 +339,21 @@ alias EventCb = void delegate(ref Event event) nothrow @nogc;
 /**
  * Event object class as passed to the EventCb callback.
  */
-struct Event {
-    nothrow @nogc:
+struct Event
+{
+nothrow @nogc:
     /** Event type */
-    enum Type {
-        ERROR,     /**< Event is an error condition */
-        STATS,     /**< Event is a statistics JSON document */
-        LOG,       /**< Event is a log message */
-        THROTTLE   /**< Event is a throttle level signaling from the broker */
-    }  
+    enum Type
+    {
+        ERROR, /**< Event is an error condition */
+        STATS, /**< Event is a statistics JSON document */
+        LOG, /**< Event is a log message */
+        THROTTLE /**< Event is a throttle level signaling from the broker */
+    }
 
     /** LOG severities (conforms to syslog(3) severities) */
-    enum Severity {
+    enum Severity
+    {
         EMERG,
         ALERT = 1,
         CRITICAL = 2,
@@ -369,10 +362,9 @@ struct Event {
         NOTICE = 5,
         INFO = 6,
         DEBUG = 7
-    }  
+    }
 
-    private this (Type type, ErrorCode err, Severity severity,
-               const char *fac, const char *str)
+    private this(Type type, ErrorCode err, Severity severity, const char* fac, const char* str)
     {
         type_ = type;
         err_ = err;
@@ -381,7 +373,7 @@ struct Event {
         str_ = str.fromStringz;
     }
 
-    private this (Type type)
+    private this(Type type)
     {
         type_ = type;
         err_ = ErrorCode.NO_ERROR;
@@ -390,46 +382,57 @@ struct Event {
         str_ = "";
     }
 
-
-    private Type        type_;
-    private ErrorCode   err_;
-    private Severity    severity_;
+    private Type type_;
+    private ErrorCode err_;
+    private Severity severity_;
     private const(char)[] fac_;
-    private const(char)[] str_;         /* reused for THROTTLE broker_name */
-    private int         id_;
-    private int         throttle_time_;
+    private const(char)[] str_; /* reused for THROTTLE broker_name */
+    private int id_;
+    private int throttle_time_;
 
-    @property:
+@property:
 
-  /*
+    /*
    * Event Accessor methods
    */
 
-  /**
+    /**
    * The event type
    * @remark Applies to all event types
    */
-    Type        type () const { return type_; }
+    Type type() const
+    {
+        return type_;
+    }
 
-  /**
+    /**
    * Event error, if any.
    * @remark Applies to all event types except THROTTLE
    */
-    ErrorCode   err () const { return err_; }
+    ErrorCode err() const
+    {
+        return err_;
+    }
 
-  /**
+    /**
    * Log severity level.
    * @remark Applies to LOG event type.
    */
-    Severity    severity () const { return severity_; }
+    Severity severity() const
+    {
+        return severity_;
+    }
 
-  /**
+    /**
    * Log facility string.
    * @remark Applies to LOG event type.
    */
-    const(char)[] fac () const { return fac_; }
+    const(char)[] fac() const
+    {
+        return fac_;
+    }
 
-  /**
+    /**
    * Log message string.
    *
    * \c LOG: Log message string.
@@ -437,19 +440,25 @@ struct Event {
    *
    * @remark Applies to LOG event type.
    */
-    const(char)[] str () const { return str_; }
+    const(char)[] str() const
+    {
+        return str_;
+    }
 
-  /**
+    /**
    * Throttle time in milliseconds.
    * @remark Applies to THROTTLE event type.
    */
-    int         throttleTime () const { return throttle_time_; }  
+    int throttleTime() const
+    {
+        return throttle_time_;
+    }
 
-  /**
+    /**
    * Throttling broker's name.
    * @remark Applies to THROTTLE event type.
    */
-    const(char)[] brokerName () const
+    const(char)[] brokerName() const
     {
         if (type_ == Type.THROTTLE)
             return str_;
@@ -457,13 +466,15 @@ struct Event {
             return "";
     }
 
-  /**
+    /**
    * Throttling broker's id.
    * @remark Applies to THROTTLE event type.
    */
-    int         brokerId () const { return id_; }
+    int brokerId() const
+    {
+        return id_;
+    }
 }
-
 
 /**
  * Consume callback class
@@ -476,7 +487,6 @@ struct Event {
 * The callback interface is optional but provides increased performance.
 */
 alias ConsumeCb = void delegate(ref Message message) nothrow @nogc;
-
 
 /**
  * \b KafkaConsunmer: Rebalance callback class
@@ -529,11 +539,8 @@ alias ConsumeCb = void delegate(ref Message message) nothrow @nogc;
 *  }
 * @endcode
 */
-alias RebalanceCb = void delegate(
-                KafkaConsumer consumer,
-                ErrorCode err,
-                ref TopicPartition[] partitions) nothrow @nogc;
-
+alias RebalanceCb = void delegate(KafkaConsumer consumer, ErrorCode err,
+    ref TopicPartition[] partitions) nothrow @nogc;
 
 /**
  * Offset Commit callback class
@@ -576,12 +583,11 @@ alias OffsetCommitCb = void delegate(ErrorCode err, ref TopicPartition[] offsets
 */
 alias SocketCb = int function(int domain, int type, int protocol) nothrow @nogc;
 
-
 /**
  * \b Portability: OpenCb callback class
  *
  */
-  /**
+/**
    * Open callback
    * The open callback is responsible for opening the file specified by
    * \p pathname, using \p flags and \p mode.
@@ -600,27 +606,22 @@ class ConfException : Exception
     /**
     * Conf::Set() result code
     */
-    enum Result {
-        UNKNOWN = -2,  /**< Unknown configuration property */
-        INVALID = -1,  /**< Invalid configuration value */
-        OK         /**< Configuration property was succesfully set */
+    enum Result
+    {
+        UNKNOWN = -2, /**< Unknown configuration property */
+        INVALID = -1, /**< Invalid configuration value */
+        OK /**< Configuration property was succesfully set */
     }
     ///
     Result result;
     ///
-    this(
-        Result result,
-        string msg,
-        string file = __FILE__,
-        uint line = cast(uint)__LINE__,
-        Throwable next = null
-        ) pure nothrow @nogc @safe
+    this(Result result, string msg, string file = __FILE__,
+        uint line = cast(uint) __LINE__, Throwable next = null) pure nothrow @nogc @safe
     {
         super(msg, file, line, next);
         this.result = result;
     }
 }
-
 
 /**
  * Configuration interface
@@ -638,28 +639,28 @@ interface Conf
      * OK on success, else writes a human readable error
      *          description to \p errstr on error.
      */
-    void opIndex (in char[] name, in char[] value);
+    void opIndex(in char[] name, in char[] value);
 
-  /** Query single configuration value
+    /** Query single configuration value
    *  OK if the property was set previously set and
    *           returns the value in \p value. */
     string opIndex(in char[] name) const;
 
-    string[] dump ();
+    string[] dump();
 }
 
 class GlobalConf : Conf
 {
 
-  /** Dump configuration names and values to list containing
+    /** Dump configuration names and values to list containing
    *         name,value tuples */
-    string[] dump ()
+    string[] dump()
     {
         size_t cnt;
         auto arrc = rd_kafka_conf_dump(rk_conf_, &cnt);
         auto arr = new string[cnt];
-        foreach (size_t i; 0..cnt)
-            arr[i] = cast(string)arrc[i].fromStringz;
+        foreach (size_t i; 0 .. cnt)
+            arr[i] = cast(string) arrc[i].fromStringz;
         rd_kafka_conf_dump_free(arrc, cnt);
         return arr;
     }
@@ -669,17 +670,16 @@ class GlobalConf : Conf
      * OK on success, else writes a human readable error
      *          description to \p errstr on error.
      */
-    void opIndex (in char[] name, in char[] value) 
+    void opIndex(in char[] name, in char[] value)
     {
         char[512] errbuf = void;
 
-        auto res = rd_kafka_conf_set(this.rk_conf_,
-                                name.toStringz(), value.toStringz(),
-                                errbuf.ptr, errbuf.sizeof);
+        auto res = rd_kafka_conf_set(this.rk_conf_, name.toStringz(),
+            value.toStringz(), errbuf.ptr, errbuf.sizeof);
         if (res != rd_kafka_conf_res_t.RD_KAFKA_CONF_OK)
-            throw new ConfException(cast(ConfException.Result)res, cast(string)errbuf.ptr.fromStringz);
+            throw new ConfException(cast(ConfException.Result) res,
+                cast(string) errbuf.ptr.fromStringz);
     }
-
 
     /** Query single configuration value
     *  OK if the property was set previously set and
@@ -691,27 +691,27 @@ class GlobalConf : Conf
         rd_kafka_conf_res_t res = rd_kafka_conf_res_t.RD_KAFKA_CONF_OK;
         res = rd_kafka_conf_get(rk_conf_, name.toStringz(), null, &size);
         if (res != rd_kafka_conf_res_t.RD_KAFKA_CONF_OK)
-           throw new ConfException(cast(ConfException.Result)res, "can not get config");
+            throw new ConfException(cast(ConfException.Result) res, "can not get config");
 
-       char[] value = new char[size];
-       res = rd_kafka_conf_get(rk_conf_, name.toStringz(), value.ptr, &size);
-       if (res != rd_kafka_conf_res_t.RD_KAFKA_CONF_OK)
-           throw new ConfException(cast(ConfException.Result)res, "can not get config");
+        char[] value = new char[size];
+        res = rd_kafka_conf_get(rk_conf_, name.toStringz(), value.ptr, &size);
+        if (res != rd_kafka_conf_res_t.RD_KAFKA_CONF_OK)
+            throw new ConfException(cast(ConfException.Result) res, "can not get config");
         return cast(string) value;
     }
 
 nothrow @nogc:
 
-    ~this() nothrow @nogc 
+     ~this() nothrow @nogc
     {
-      if (rk_conf_)
-            rd_kafka_conf_destroy(rk_conf_);      
+        if (rk_conf_)
+            rd_kafka_conf_destroy(rk_conf_);
     }
 
     /**
     * Create configuration object
     */
-    this() 
+    this()
     {
         rk_conf_ = rd_kafka_conf_new();
     }
@@ -723,7 +723,6 @@ nothrow @nogc:
     private RebalanceCb rebalance_cb_;
     private OffsetCommitCb offset_commit_cb_;
     private rd_kafka_conf_t* rk_conf_;
-
 
     /++
     +/
@@ -762,7 +761,6 @@ nothrow @nogc:
         offset_commit_cb_ = cb;
     }
 
-
     /** Use with \p name = \c \"default_topic_conf\"
      *
      * Sets the default topic configuration to use for for automatically
@@ -770,10 +768,10 @@ nothrow @nogc:
      *
      * @sa subscribe()
      */
-    void defaultTopicConf (in char[] name,
-                                  const TopicConf topic_conf)
+    void defaultTopicConf(in char[] name, const TopicConf topic_conf)
     {
-        rd_kafka_conf_set_default_topic_conf(rk_conf_, rd_kafka_topic_conf_dup(topic_conf.rkt_conf_));
+        rd_kafka_conf_set_default_topic_conf(rk_conf_,
+            rd_kafka_topic_conf_dup(topic_conf.rkt_conf_));
     }
 }
 
@@ -784,20 +782,20 @@ class TopicConf : Conf
      * OK on success, else writes a human readable error
      *          description to \p errstr on error.
      */
-    void opIndex (in char[] name, in char[] value)
+    void opIndex(in char[] name, in char[] value)
     {
         rd_kafka_conf_res_t res;
         char[512] errbuf = void;
 
-        res = rd_kafka_topic_conf_set(this.rkt_conf_,
-                                      name.toStringz(), value.toStringz(),
-                                      errbuf.ptr, errbuf.sizeof);
+        res = rd_kafka_topic_conf_set(this.rkt_conf_, name.toStringz(),
+            value.toStringz(), errbuf.ptr, errbuf.sizeof);
 
         if (res != rd_kafka_conf_res_t.RD_KAFKA_CONF_OK)
-            throw new ConfException(cast(ConfException.Result)res, cast(string)errbuf.ptr.fromStringz);
+            throw new ConfException(cast(ConfException.Result) res,
+                cast(string) errbuf.ptr.fromStringz);
     }
 
-  /** Query single configuration value
+    /** Query single configuration value
    *  OK if the property was set previously set and
    *           returns the value in \p value. */
     string opIndex(in char[] name) const
@@ -806,22 +804,22 @@ class TopicConf : Conf
         rd_kafka_conf_res_t res = rd_kafka_conf_res_t.RD_KAFKA_CONF_OK;
         res = rd_kafka_topic_conf_get(rkt_conf_, name.toStringz(), null, &size);
         if (res != rd_kafka_conf_res_t.RD_KAFKA_CONF_OK)
-           throw new ConfException(cast(ConfException.Result)res, "can not get config");
+            throw new ConfException(cast(ConfException.Result) res, "can not get config");
         char[] value = new char[size];
         res = rd_kafka_topic_conf_get(rkt_conf_, name.toStringz(), value.ptr, &size);
         if (res != rd_kafka_conf_res_t.RD_KAFKA_CONF_OK)
-           throw new ConfException(cast(ConfException.Result)res, "can not get config");
-         return cast(string) value;
+            throw new ConfException(cast(ConfException.Result) res, "can not get config");
+        return cast(string) value;
     }
 
     /** Dump configuration names and values to list containing
      *         name,value tuples */
-    string[] dump ()
+    string[] dump()
     {
         size_t cnt;
         auto arrc = rd_kafka_topic_conf_dump(rkt_conf_, &cnt);
         auto arr = new string[cnt];
-        foreach (size_t i; 0..cnt)
+        foreach (size_t i; 0 .. cnt)
             arr[i] = cast(string) arrc[i].fromStringz;
         rd_kafka_conf_dump_free(arrc, cnt);
         return arr;
@@ -829,10 +827,10 @@ class TopicConf : Conf
 
 nothrow @nogc:
 
-    ~this()
+     ~this()
     {
-      if (rkt_conf_)
-          rd_kafka_topic_conf_destroy(rkt_conf_);
+        if (rkt_conf_)
+            rd_kafka_topic_conf_destroy(rkt_conf_);
     }
 
     /**
@@ -867,7 +865,7 @@ nothrow @nogc:
 class Handle
 {
 
-   /**
+    /**
     * Returns the client's broker-assigned group member id
     *
     * @remark This currently requires the high-level KafkaConsumer
@@ -875,52 +873,59 @@ class Handle
     * Last assigned member id, or empty string if not currently
     *          a group member.
     */
-    string memberid () const
+    string memberid() const
     {
-        char *str = rd_kafka_memberid(rk_);
-        string memberid = cast(string)str.fromStringz;
+        char* str = rd_kafka_memberid(rk_);
+        string memberid = cast(string) str.fromStringz;
         if (str)
-            rd_kafka_mem_free(cast(rd_kafka_s*)rk_, str);
+            rd_kafka_mem_free(cast(rd_kafka_s*) rk_, str);
         return memberid;
     }
 
 nothrow @nogc:
 
-    private void setCommonConfig (GlobalConf conf) 
-    {  
-       rd_kafka_conf_set_opaque(conf.rk_conf_, cast(void*)this); 
+    private void setCommonConfig(GlobalConf conf)
+    {
+        rd_kafka_conf_set_opaque(conf.rk_conf_, cast(void*) this);
 
-       if (conf.event_cb_) {
-         rd_kafka_conf_set_log_cb(conf.rk_conf_, &log_cb_trampoline);
-         rd_kafka_conf_set_error_cb(conf.rk_conf_, &error_cb_trampoline);
-         rd_kafka_conf_set_throttle_cb(conf.rk_conf_, &throttle_cb_trampoline);
-         rd_kafka_conf_set_stats_cb(conf.rk_conf_, &stats_cb_trampoline);
-         event_cb_ = conf.event_cb_;
-       } 
+        if (conf.event_cb_)
+        {
+            rd_kafka_conf_set_log_cb(conf.rk_conf_, &log_cb_trampoline);
+            rd_kafka_conf_set_error_cb(conf.rk_conf_, &error_cb_trampoline);
+            rd_kafka_conf_set_throttle_cb(conf.rk_conf_, &throttle_cb_trampoline);
+            rd_kafka_conf_set_stats_cb(conf.rk_conf_, &stats_cb_trampoline);
+            event_cb_ = conf.event_cb_;
+        }
 
-       if (conf.socket_cb_) {
-         rd_kafka_conf_set_socket_cb(conf.rk_conf_, &socket_cb_trampoline);
-         socket_cb_ = conf.socket_cb_;
-       } 
+        if (conf.socket_cb_)
+        {
+            rd_kafka_conf_set_socket_cb(conf.rk_conf_, &socket_cb_trampoline);
+            socket_cb_ = conf.socket_cb_;
+        }
 
-       version(Windows) {} else
-       if (conf.open_cb_) {
-         rd_kafka_conf_set_open_cb(conf.rk_conf_, &open_cb_trampoline);
-         open_cb_ = conf.open_cb_;
-       } 
+        version (Windows)
+        {
+        }
+        else if (conf.open_cb_)
+        {
+            rd_kafka_conf_set_open_cb(conf.rk_conf_, &open_cb_trampoline);
+            open_cb_ = conf.open_cb_;
+        }
 
-       if (conf.rebalance_cb_) {
-         rd_kafka_conf_set_rebalance_cb(conf.rk_conf_, &rebalance_cb_trampoline);
-         rebalance_cb_ = conf.rebalance_cb_;
-       } 
+        if (conf.rebalance_cb_)
+        {
+            rd_kafka_conf_set_rebalance_cb(conf.rk_conf_, &rebalance_cb_trampoline);
+            rebalance_cb_ = conf.rebalance_cb_;
+        }
 
-       if (conf.offset_commit_cb_) {
-         rd_kafka_conf_set_offset_commit_cb(conf.rk_conf_, &offset_commit_cb_trampoline);
-         offset_commit_cb_ = conf.offset_commit_cb_;
-       }
+        if (conf.offset_commit_cb_)
+        {
+            rd_kafka_conf_set_offset_commit_cb(conf.rk_conf_, &offset_commit_cb_trampoline);
+            offset_commit_cb_ = conf.offset_commit_cb_;
+        }
     }
 
-   /**
+    /**
     * Query broker for low (oldest/beginning)
     *        and high (newest/end) offsets for partition.
     *
@@ -928,11 +933,12 @@ nothrow @nogc:
     *
     * ERR_NO_ERROR on success or an error code on failure.
     */
-    ErrorCode query_watermark_offsets (const(char)* topic, int partition, long *low, long *high, int timeout_ms)
+    ErrorCode query_watermark_offsets(const(char)* topic, int partition,
+        long* low, long* high, int timeout_ms)
     {
-        return cast(ErrorCode)
-            rd_kafka_query_watermark_offsets(rk_, topic, partition, low, high, timeout_ms);
-    }    
+        return cast(ErrorCode) rd_kafka_query_watermark_offsets(rk_, topic,
+            partition, low, high, timeout_ms);
+    }
 
     private rd_kafka_t* rk_;
     /* All Producer and Consumer callbacks must reside in HandleImpl and
@@ -949,12 +955,12 @@ nothrow @nogc:
     private OffsetCommitCb offset_commit_cb_;
 
     /** the name of the handle */
-    const(char)[] name () const
+    const(char)[] name() const
     {
         return rd_kafka_name(rk_).fromStringz;
     }
 
-   /**
+    /**
     * Polls the provided kafka handle for events.
     *
     * Events will trigger application provided callbacks to be called.
@@ -976,23 +982,23 @@ nothrow @nogc:
     *
     * the number of events served.
     */
-    int poll (int timeout_ms) 
+    int poll(int timeout_ms)
     {
         return rd_kafka_poll(rk_, timeout_ms);
     }
 
-   /**
+    /**
     *  Returns the current out queue length
     *
     * The out queue contains messages and requests waiting to be sent to,
     * or acknowledged by, the broker.
     */
-    int outqLen () 
+    int outqLen()
     {
         return rd_kafka_outq_len(rk_);
     }
 
-   /**
+    /**
     * Request Metadata from broker.
     *
     * Parameters:
@@ -1007,31 +1013,35 @@ nothrow @nogc:
     * will be set), else TIMED_OUT on timeout or
     * other error code on error.
     */
-     ErrorCode metadata (bool all_topics, const Topic only_rkt, ref Metadata metadata, int timeout_ms)
+    ErrorCode metadata(bool all_topics, const Topic only_rkt, ref Metadata metadata,
+        int timeout_ms)
     {
-        const rd_kafka_metadata_t* cmetadatap = null;      
+        const rd_kafka_metadata_t* cmetadatap = null;
 
-        rd_kafka_topic_t* topic = only_rkt ? cast(rd_kafka_topic_t*)only_rkt.rkt_ : null;      
+        rd_kafka_topic_t* topic = only_rkt ? cast(rd_kafka_topic_t*) only_rkt.rkt_ : null;
 
-        const rd_kafka_resp_err_t rc = rd_kafka_metadata(rk_, all_topics, topic, &cmetadatap, timeout_ms);      
+        const rd_kafka_resp_err_t rc = rd_kafka_metadata(rk_, all_topics,
+            topic, &cmetadatap, timeout_ms);
 
-        metadata = Metadata(cmetadatap);      
+        metadata = Metadata(cmetadatap);
 
-        return cast(ErrorCode)rc;
+        return cast(ErrorCode) rc;
     }
 
     /**
      * Convert a list of C partitions to C++ partitions
      */
-    private static  TopicPartition[] c_parts_to_partitions (const rd_kafka_topic_partition_list_t* c_parts)
+    private static TopicPartition[] c_parts_to_partitions(
+        const rd_kafka_topic_partition_list_t* c_parts)
     {
-        auto partitions = (cast(TopicPartition*)malloc(c_parts.cnt * TopicPartition.sizeof))[0 .. c_parts.cnt];
+        auto partitions = (cast(TopicPartition*) malloc(c_parts.cnt * TopicPartition.sizeof))[0
+            .. c_parts.cnt];
         foreach (i, ref p; partitions)
             partitions[i] = TopicPartition(&c_parts.elems[i]);
         return partitions;
     }
 
-    static  void free_partition_vector (ref TopicPartition[] v)
+    static void free_partition_vector(ref TopicPartition[] v)
     {
         foreach (ref p; v)
             p.destroy;
@@ -1039,13 +1049,16 @@ nothrow @nogc:
         v = null;
     }
 
-
-    private static  rd_kafka_topic_partition_list_t* partitions_to_c_parts(const TopicPartition[] partitions)
+    private static rd_kafka_topic_partition_list_t* partitions_to_c_parts(
+        const TopicPartition[] partitions)
     {
-        rd_kafka_topic_partition_list_t* c_parts = rd_kafka_topic_partition_list_new(cast(int)partitions.length);
- 
-        foreach (ref tpi; partitions) {
-            rd_kafka_topic_partition_t* rktpar = rd_kafka_topic_partition_list_add(c_parts, tpi.topic_, tpi.partition_);
+        rd_kafka_topic_partition_list_t* c_parts = rd_kafka_topic_partition_list_new(
+            cast(int) partitions.length);
+
+        foreach (ref tpi; partitions)
+        {
+            rd_kafka_topic_partition_t* rktpar = rd_kafka_topic_partition_list_add(c_parts,
+                tpi.topic_, tpi.partition_);
             rktpar.offset = tpi.offset_;
         }
 
@@ -1055,12 +1068,12 @@ nothrow @nogc:
     /**
      * @brief Update the application provided 'partitions' with info from 'c_parts'
      */
-    private static  void
-    update_partitions_from_c_parts (TopicPartition[] partitions, const rd_kafka_topic_partition_list_t* c_parts)
+    private static void update_partitions_from_c_parts(TopicPartition[] partitions,
+        const rd_kafka_topic_partition_list_t* c_parts)
     {
         foreach (i; 0 .. c_parts.cnt)
         {
-            const rd_kafka_topic_partition_t* p = &c_parts.elems[i];  
+            const rd_kafka_topic_partition_t* p = &c_parts.elems[i];
 
             /* Find corresponding C++ entry */
             foreach (pp; partitions)
@@ -1074,115 +1087,107 @@ nothrow @nogc:
         }
     }
 
-    private static  void log_cb_trampoline (const rd_kafka_t* rk, int level,
-                                     const (char) *fac, const (char) *buf) {
-      if (!rk) {
-        rd_kafka_log_print(rk, level, fac, buf);
-        return;
-      }    
-
-      void* opaque = rd_kafka_opaque(rk);
-      Handle handle = cast(Handle)(opaque);    
-
-      if (!handle.event_cb_) {
-        rd_kafka_log_print(rk, level, fac, buf);
-        return;
-      }    
-
-      auto event = Event(Event.Type.LOG, ErrorCode.NO_ERROR,
-                               cast(Event.Severity)(level),
-                               fac, buf);    
-
-      handle.event_cb_(event);
-    }    
-    
-
-    private static  void error_cb_trampoline (rd_kafka_t* rk, int err,
-                                       const (char) *reason, void* opaque) {
-      Handle handle = cast(Handle)(opaque);    
-
-      auto event = Event(Event.Type.ERROR,
-                               cast(ErrorCode)err,
-                               Event.Severity.ERROR,
-                               null,
-                               reason);    
-
-      handle.event_cb_(event);
-    }    
-    
-
-    private static  void throttle_cb_trampoline (rd_kafka_t* rk, const (char) *broker_name,
-                          int broker_id,
-                          int throttle_time_ms,
-                          void* opaque) {
-      Handle handle = cast(Handle)(opaque);    
-
-      auto event = Event(Event.Type.THROTTLE);
-      event.str_ = broker_name.fromStringz;
-      event.id_ = broker_id;
-      event.throttle_time_ = throttle_time_ms;    
-
-      handle.event_cb_(event);
-    }    
-    
-
-    private static  int stats_cb_trampoline (rd_kafka_t* rk, char *json, size_t json_len, void* opaque)
+    private static void log_cb_trampoline(const rd_kafka_t* rk, int level,
+        const(char)* fac, const(char)* buf)
     {
-      Handle handle = cast(Handle)(opaque);
-      auto event = Event(Event.Type.STATS,
-                               ErrorCode.NO_ERROR,
-                               Event.Severity.INFO,
-                               null, json);    
+        if (!rk)
+        {
+            rd_kafka_log_print(rk, level, fac, buf);
+            return;
+        }
 
-      handle.event_cb_(event);    
+        void* opaque = rd_kafka_opaque(rk);
+        Handle handle = cast(Handle)(opaque);
 
-      return 0;
-    }    
-    
+        if (!handle.event_cb_)
+        {
+            rd_kafka_log_print(rk, level, fac, buf);
+            return;
+        }
 
-    private static  int socket_cb_trampoline (int domain, int type, int protocol, void* opaque)
-    {
-      Handle handle = cast(Handle)(opaque);
+        auto event = Event(Event.Type.LOG, ErrorCode.NO_ERROR,
+            cast(Event.Severity)(level), fac, buf);
 
-      return handle.socket_cb_(domain, type, protocol);
-    }    
-
-    private static  int open_cb_trampoline (const (char) *pathname, int flags, mode_t mode, void* opaque) {
-      Handle handle = cast(Handle)(opaque);
-
-      return handle.open_cb_(pathname.fromStringz, flags, cast(int)(mode));
-    }
-    
-
-    private static  void rebalance_cb_trampoline (rd_kafka_t* rk,
-                                      rd_kafka_resp_err_t err,
-                                      rd_kafka_topic_partition_list_t* c_partitions,
-                                      void* opaque) {
-      auto handle = cast(KafkaConsumer)(opaque);
-      TopicPartition[] partitions = c_parts_to_partitions(c_partitions);
-
-      handle.rebalance_cb_(handle, cast(ErrorCode)err, partitions);
-
-      free_partition_vector(partitions);
-    }    
-    
-
-    private static  void offset_commit_cb_trampoline (
-        rd_kafka_t* rk,
-        rd_kafka_resp_err_t err,
-        rd_kafka_topic_partition_list_t* c_offsets, void* opaque) {
-      Handle handle = cast(Handle)(opaque);
-      TopicPartition[] offsets;    
-
-      if (c_offsets)
-        offsets = c_parts_to_partitions(c_offsets);    
-
-      handle.offset_commit_cb_(cast(ErrorCode)err, offsets);    
-
-      free_partition_vector(offsets);
+        handle.event_cb_(event);
     }
 
-   /**
+    private static void error_cb_trampoline(rd_kafka_t* rk, int err,
+        const(char)* reason, void* opaque)
+    {
+        Handle handle = cast(Handle)(opaque);
+
+        auto event = Event(Event.Type.ERROR, cast(ErrorCode) err,
+            Event.Severity.ERROR, null, reason);
+
+        handle.event_cb_(event);
+    }
+
+    private static void throttle_cb_trampoline(rd_kafka_t* rk,
+        const(char)* broker_name, int broker_id, int throttle_time_ms, void* opaque)
+    {
+        Handle handle = cast(Handle)(opaque);
+
+        auto event = Event(Event.Type.THROTTLE);
+        event.str_ = broker_name.fromStringz;
+        event.id_ = broker_id;
+        event.throttle_time_ = throttle_time_ms;
+
+        handle.event_cb_(event);
+    }
+
+    private static int stats_cb_trampoline(rd_kafka_t* rk, char* json,
+        size_t json_len, void* opaque)
+    {
+        Handle handle = cast(Handle)(opaque);
+        auto event = Event(Event.Type.STATS, ErrorCode.NO_ERROR, Event.Severity.INFO,
+            null, json);
+
+        handle.event_cb_(event);
+
+        return 0;
+    }
+
+    private static int socket_cb_trampoline(int domain, int type, int protocol, void* opaque)
+    {
+        Handle handle = cast(Handle)(opaque);
+
+        return handle.socket_cb_(domain, type, protocol);
+    }
+
+    private static int open_cb_trampoline(const(char)* pathname, int flags,
+        mode_t mode, void* opaque)
+    {
+        Handle handle = cast(Handle)(opaque);
+
+        return handle.open_cb_(pathname.fromStringz, flags, cast(int)(mode));
+    }
+
+    private static void rebalance_cb_trampoline(rd_kafka_t* rk,
+        rd_kafka_resp_err_t err, rd_kafka_topic_partition_list_t* c_partitions, void* opaque)
+    {
+        auto handle = cast(KafkaConsumer)(opaque);
+        TopicPartition[] partitions = c_parts_to_partitions(c_partitions);
+
+        handle.rebalance_cb_(handle, cast(ErrorCode) err, partitions);
+
+        free_partition_vector(partitions);
+    }
+
+    private static void offset_commit_cb_trampoline(rd_kafka_t* rk,
+        rd_kafka_resp_err_t err, rd_kafka_topic_partition_list_t* c_offsets, void* opaque)
+    {
+        Handle handle = cast(Handle)(opaque);
+        TopicPartition[] offsets;
+
+        if (c_offsets)
+            offsets = c_parts_to_partitions(c_offsets);
+
+        handle.offset_commit_cb_(cast(ErrorCode) err, offsets);
+
+        free_partition_vector(offsets);
+    }
+
+    /**
     * Pause producing or consumption for the provided list of partitions.
     *
     * Success or error is returned per-partition in the \p partitions list.
@@ -1191,26 +1196,25 @@ nothrow @nogc:
     *
     * @sa resume()
     */
-    nothrow ErrorCode pause (TopicPartition[] partitions)
+    nothrow ErrorCode pause(TopicPartition[] partitions)
     {
         rd_kafka_topic_partition_list_t* c_parts;
-        rd_kafka_resp_err_t err;      
+        rd_kafka_resp_err_t err;
 
-        c_parts = partitions_to_c_parts(partitions);      
+        c_parts = partitions_to_c_parts(partitions);
 
-        err = rd_kafka_pause_partitions(rk_, c_parts);      
+        err = rd_kafka_pause_partitions(rk_, c_parts);
 
         if (!err)
-          update_partitions_from_c_parts(partitions, c_parts);      
+            update_partitions_from_c_parts(partitions, c_parts);
 
-        rd_kafka_topic_partition_list_destroy(c_parts);      
+        rd_kafka_topic_partition_list_destroy(c_parts);
 
-        return cast(ErrorCode)err;
+        return cast(ErrorCode) err;
 
     }
- 
 
-   /**
+    /**
     * Resume producing or consumption for the provided list of partitions.
     *
     * Success or error is returned per-partition in the \p partitions list.
@@ -1219,24 +1223,24 @@ nothrow @nogc:
     *
     * @sa pause()
     */
-    nothrow ErrorCode resume (TopicPartition[] partitions)
+    nothrow ErrorCode resume(TopicPartition[] partitions)
     {
         rd_kafka_topic_partition_list_t* c_parts;
-        rd_kafka_resp_err_t err;       
+        rd_kafka_resp_err_t err;
 
-        c_parts = partitions_to_c_parts(partitions);       
+        c_parts = partitions_to_c_parts(partitions);
 
-        err = rd_kafka_resume_partitions(rk_, c_parts);        
+        err = rd_kafka_resume_partitions(rk_, c_parts);
 
         if (!err)
-            update_partitions_from_c_parts(partitions, c_parts);         
+            update_partitions_from_c_parts(partitions, c_parts);
 
-        rd_kafka_topic_partition_list_destroy(c_parts);       
+        rd_kafka_topic_partition_list_destroy(c_parts);
 
-        return cast(ErrorCode)err;
+        return cast(ErrorCode) err;
     }
- 
-  /**
+
+    /**
    * Get last known low (oldest/beginning)
    *        and high (newest/end) offsets for partition.
    *
@@ -1253,17 +1257,13 @@ nothrow @nogc:
    *
    * @remark Shall only be used with an active consumer instance.
    */
-   ErrorCode getWatermarkOffsets (const (char)* topic,
-             int partition,
-             ref long low, ref long high)
-   {
-        return cast(ErrorCode)
-            rd_kafka_get_watermark_offsets(
-                rk_, topic, partition,
-                &low, &high);
-   }
+    ErrorCode getWatermarkOffsets(const(char)* topic, int partition, ref long low,
+        ref long high)
+    {
+        return cast(ErrorCode) rd_kafka_get_watermark_offsets(rk_, topic,
+            partition, &low, &high);
+    }
 }
-
 
 /**
  * Topic+Partition
@@ -1280,17 +1280,18 @@ struct TopicPartition
     void toString(in void delegate(const(char)[]) sink) const
     {
         import std.format;
+
         sink.formattedWrite("%s[%s]", topic_, partition_);
     }
 
 nothrow @nogc:
 
-  /**
+    /**
    * Create topic+partition object for \p topic and \p partition.
    *
    * Use \c delete to deconstruct.
    */
-    nothrow this (const(char)* topic, int partition)
+    nothrow this(const(char)* topic, int partition)
     {
         topic_ = topic;
         partition_ = partition;
@@ -1299,7 +1300,7 @@ nothrow @nogc:
     }
 
     /// ditto
-    this (const(char)* topic, int partition)
+    this(const(char)* topic, int partition)
     {
         topic_ = topic;
         partition_ = partition;
@@ -1307,36 +1308,54 @@ nothrow @nogc:
         err_ = ErrorCode.NO_ERROR;
     }
 
-    private this (const rd_kafka_topic_partition_t* c_part) {
+    private this(const rd_kafka_topic_partition_t* c_part)
+    {
         topic_ = c_part.topic;
         partition_ = c_part.partition;
         offset_ = c_part.offset;
-        err_ = cast(ErrorCode)c_part.err;
+        err_ = cast(ErrorCode) c_part.err;
         // FIXME: metadata
-    }  
+    }
 
     private const(char)* topic_;
     private int partition_;
     private long offset_;
-    private ErrorCode err_;  
-  
+    private ErrorCode err_;
 
     /** partition id */
-    int partition () { return partition_; }
+    int partition()
+    {
+        return partition_;
+    }
     /** topic name */
-    const(char)[] topic () const { return topic_.fromStringz ; }  
+    const(char)[] topic() const
+    {
+        return topic_.fromStringz;
+    }
 
     /** offset (if applicable) */
-    long offset () { return offset_; }  
+    long offset()
+    {
+        return offset_;
+    }
 
     /** Set offset */
-    void offset (long offset) { offset_ = offset; }  
+    void offset(long offset)
+    {
+        offset_ = offset;
+    }
 
     /** error code (if applicable) */
-    ErrorCode err () { return err_; }  
+    ErrorCode err()
+    {
+        return err_;
+    }
 
     /** Set offset */
-    void offset (long offset) { offset_ = offset; }  
+    void offset(long offset)
+    {
+        offset_ = offset;
+    }
 }
 
 /**
@@ -1345,7 +1364,7 @@ nothrow @nogc:
  */
 class Topic
 {
-  /**
+    /**
    * Creates a new topic handle for topic named \p topic_str
    *
    * \p conf is an optional configuration for the topic  that will be used
@@ -1354,108 +1373,103 @@ class Topic
    *
    * the new topic handle or null on error (see \p errstr).
    */
-  this (Handle base, const(char)[] topic_str, TopicConf conf)
-  {
-    rd_kafka_topic_conf_t* rkt_conf;  
+    this(Handle base, const(char)[] topic_str, TopicConf conf)
+    {
+        rd_kafka_topic_conf_t* rkt_conf;
 
-    if (!conf)
-      rkt_conf = rd_kafka_topic_conf_new();
-    else /* Make a copy of conf struct to allow Conf reuse. */
-      rkt_conf = rd_kafka_topic_conf_dup(conf.rkt_conf_);  
+        if (!conf)
+            rkt_conf = rd_kafka_topic_conf_new();
+        else /* Make a copy of conf struct to allow Conf reuse. */
+            rkt_conf = rd_kafka_topic_conf_dup(conf.rkt_conf_);
 
-    /* Set topic opaque to the topic so that we can reach our topic object
+        /* Set topic opaque to the topic so that we can reach our topic object
      * from whatever callbacks get registered.
      * The application itself will not need these opaques since their
      * callbacks are class based. */
-    rd_kafka_topic_conf_set_opaque(rkt_conf, cast(void*)this);
+        rd_kafka_topic_conf_set_opaque(rkt_conf, cast(void*) this);
 
-    if (conf)
-    {
-      if (conf.partitioner_cb_)
-      {
-        rd_kafka_topic_conf_set_partitioner_cb(rkt_conf, &partitioner_cb_trampoline);
-        this.partitioner_cb_ = conf.partitioner_cb_;
-      }
-      else
-      if (conf.partitioner_kp_cb_)
-      {
-        rd_kafka_topic_conf_set_partitioner_cb(rkt_conf, &partitioner_kp_cb_trampoline);
-        this.partitioner_kp_cb_ = conf.partitioner_kp_cb_;
-      }
-    }  
-    rkt_ = rd_kafka_topic_new(base.rk_, topic_str.toStringz(), rkt_conf);
-    if (!rkt_)
-    {
-        auto errstr = rd_kafka_err2str(rd_kafka_errno2err(errno));
-        rd_kafka_topic_conf_destroy(rkt_conf);
-        throw new Exception(cast(string)errstr.fromStringz);
-    }  
-  }
+        if (conf)
+        {
+            if (conf.partitioner_cb_)
+            {
+                rd_kafka_topic_conf_set_partitioner_cb(rkt_conf, &partitioner_cb_trampoline);
+                this.partitioner_cb_ = conf.partitioner_cb_;
+            }
+            else if (conf.partitioner_kp_cb_)
+            {
+                rd_kafka_topic_conf_set_partitioner_cb(rkt_conf, &partitioner_kp_cb_trampoline);
+                this.partitioner_kp_cb_ = conf.partitioner_kp_cb_;
+            }
+        }
+        rkt_ = rd_kafka_topic_new(base.rk_, topic_str.toStringz(), rkt_conf);
+        if (!rkt_)
+        {
+            auto errstr = rd_kafka_err2str(rd_kafka_errno2err(errno));
+            rd_kafka_topic_conf_destroy(rkt_conf);
+            throw new Exception(cast(string) errstr.fromStringz);
+        }
+    }
 
-  nothrow @nogc:
+nothrow @nogc:
 
-    ~this()
+     ~this()
     {
-        if(rkt_)
+        if (rkt_)
             rd_kafka_topic_destroy(rkt_);
     }
 
-  private rd_kafka_topic_t* rkt_;
-  private PartitionerCb partitioner_cb_;
-  private PartitionerKeyPointerCb partitioner_kp_cb_;
+    private rd_kafka_topic_t* rkt_;
+    private PartitionerCb partitioner_cb_;
+    private PartitionerKeyPointerCb partitioner_kp_cb_;
 
-  /**
+    /**
    * Unassigned partition.
    *
    * The unassigned partition is used by the producer API for messages
    * that should be partitioned using the configured or default partitioner.
    */
-  enum int PARTITION_UA = -1;
+    enum int PARTITION_UA = -1;
 
-  /** Special offsets */
-  enum long OFFSET_BEGINNING = -2; /**< Consume from beginning */
-  enum long OFFSET_END       = -1; /**< Consume from end */
-  enum long OFFSET_STORED    = -1000; /**< Use offset storage */
-  enum long OFFSET_INVALID   = -1001; /**< Invalid offset */  
+    /** Special offsets */
+    enum long OFFSET_BEGINNING = -2; /**< Consume from beginning */
+    enum long OFFSET_END = -1; /**< Consume from end */
+    enum long OFFSET_STORED = -1000; /**< Use offset storage */
+    enum long OFFSET_INVALID = -1001; /**< Invalid offset */
 
-  private static nothrow @nogc int partitioner_cb_trampoline (const rd_kafka_topic_t* rkt,
-                                            const (void)* keydata,
-                                            size_t keylen,
-                                            int partition_cnt,
-                                            void* rkt_opaque,
-                                            void* msg_opaque) {
-    auto topic = cast(Topic) rkt_opaque;
-    auto key = (cast(const(char)*)keydata)[0 .. keylen];
-    return topic.partitioner_cb_(topic, key, partition_cnt, msg_opaque);
-  }  
+    private static nothrow @nogc int partitioner_cb_trampoline(
+        const rd_kafka_topic_t* rkt, const(void)* keydata, size_t keylen,
+        int partition_cnt, void* rkt_opaque, void* msg_opaque)
+    {
+        auto topic = cast(Topic) rkt_opaque;
+        auto key = (cast(const(char)*) keydata)[0 .. keylen];
+        return topic.partitioner_cb_(topic, key, partition_cnt, msg_opaque);
+    }
 
-  private static nothrow @nogc int partitioner_kp_cb_trampoline (const rd_kafka_topic_t* rkt,
-                                               const (void)* keydata,
-                                               size_t keylen,
-                                               int partition_cnt,
-                                               void* rkt_opaque,
-                                               void* msg_opaque) {
-    auto topic = cast(Topic) rkt_opaque;
-    return topic.partitioner_kp_cb_(topic, keydata, keylen, partition_cnt, msg_opaque);
-  }  
+    private static nothrow @nogc int partitioner_kp_cb_trampoline(
+        const rd_kafka_topic_t* rkt, const(void)* keydata, size_t keylen,
+        int partition_cnt, void* rkt_opaque, void* msg_opaque)
+    {
+        auto topic = cast(Topic) rkt_opaque;
+        return topic.partitioner_kp_cb_(topic, keydata, keylen, partition_cnt, msg_opaque);
+    }
 
-  /** the topic name */
-    const(char)[] name () const
+    /** the topic name */
+    const(char)[] name() const
     {
         return rd_kafka_topic_name(rkt_).fromStringz;
     }
 
-  /**
+    /**
    * true if \p partition is available for the topic (has leader).
    * @warning \b MUST \b ONLY be called from within a
    *          PartitionerCb callback.
    */
-   bool partitionAvailable (int partition) const
-   {
-        return cast(bool)rd_kafka_topic_partition_available(rkt_, partition);
-   }
+    bool partitionAvailable(int partition) const
+    {
+        return cast(bool) rd_kafka_topic_partition_available(rkt_, partition);
+    }
 
-  /**
+    /**
    * Store offset \p offset for topic partition \p partition.
    * The offset will be committed (written) to the offset store according
    * to \p auto.commit.interval.ms.
@@ -1466,12 +1480,11 @@ class Topic
    *
    * ERR_NO_ERROR on success or an error code on error.
    */
-   ErrorCode offsetStore (int partition, long offset)
-   {
-      return cast(ErrorCode) rd_kafka_offset_store(rkt_, partition, offset);
-   }
+    ErrorCode offsetStore(int partition, long offset)
+    {
+        return cast(ErrorCode) rd_kafka_offset_store(rkt_, partition, offset);
+    }
 }
-
 
 /**
  * Message timestamp object
@@ -1484,18 +1497,18 @@ class Topic
  *
  */
 
-struct MessageTimestamp {
-  enum Type {
-    MSG_TIMESTAMP_NOT_AVAILABLE,   /**< Timestamp not available */
-    MSG_TIMESTAMP_CREATE_TIME,     /**< Message creation time (source) */
-    MSG_TIMESTAMP_LOG_APPEND_TIME  /**< Message log append time (broker) */
-  }
+struct MessageTimestamp
+{
+    enum Type
+    {
+        MSG_TIMESTAMP_NOT_AVAILABLE, /**< Timestamp not available */
+        MSG_TIMESTAMP_CREATE_TIME, /**< Message creation time (source) */
+        MSG_TIMESTAMP_LOG_APPEND_TIME /**< Message log append time (broker) */
+    }
 
-  long timestamp;               /**< Milliseconds since epoch (UTC). */
-  Type type;       /**< Timestamp type */
+    long timestamp; /**< Milliseconds since epoch (UTC). */
+    Type type; /**< Timestamp type */
 }
-
-
 
 /**
  * Message object
@@ -1510,132 +1523,137 @@ struct MessageTimestamp {
  */
 struct Message
 {
-  @disable this(this);
-  nothrow @nogc:
-  ~this ()
-  {
-    if (free_rkmessage_)
-      rd_kafka_message_destroy(cast(rd_kafka_message_t*)rkmessage_);
-  }
+    @disable this(this);
+nothrow @nogc:
+     ~this()
+    {
+        if (free_rkmessage_)
+            rd_kafka_message_destroy(cast(rd_kafka_message_t*) rkmessage_);
+    }
 
-  this (Topic topic, rd_kafka_message_t* rkmessage)
+    this(Topic topic, rd_kafka_message_t* rkmessage)
     {
         topic_ = topic;
         rkmessage_ = rkmessage;
         free_rkmessage_ = true;
     }
 
-  this (Topic topic, rd_kafka_message_t* rkmessage, bool dofree)
-  {
-    topic_ = topic;
-    rkmessage_ = rkmessage;
-    free_rkmessage_ = dofree;
-    }
-
-  this (Topic topic, const rd_kafka_message_t* rkmessage){
-    topic_ = topic;
-    rkmessage_ = rkmessage;
-  }
-
-  this (rd_kafka_message_t* rkmessage)
-  {
-
-    rkmessage_ = rkmessage;
-    free_rkmessage_ = true;
-
-    if (rkmessage.rkt)
+    this(Topic topic, rd_kafka_message_t* rkmessage, bool dofree)
     {
-      /* Possibly null */
-      topic_ = cast(Topic)rd_kafka_topic_opaque(rkmessage.rkt);
+        topic_ = topic;
+        rkmessage_ = rkmessage;
+        free_rkmessage_ = dofree;
     }
-  }
 
-  /* Create errored message */
-  this (Topic topic, ErrorCode err)
-  {
-    topic_ = topic;
-    rkmessage_ = &rkmessage_err_;
-    memset(&rkmessage_err_, 0, rkmessage_err_.sizeof);
-    rkmessage_err_.err = cast(rd_kafka_resp_err_t)(err);
-  }
+    this(Topic topic, const rd_kafka_message_t* rkmessage)
+    {
+        topic_ = topic;
+        rkmessage_ = rkmessage;
+    }
 
-  /** The error string if object represent an error event,
+    this(rd_kafka_message_t* rkmessage)
+    {
+
+        rkmessage_ = rkmessage;
+        free_rkmessage_ = true;
+
+        if (rkmessage.rkt)
+        {
+            /* Possibly null */
+            topic_ = cast(Topic) rd_kafka_topic_opaque(rkmessage.rkt);
+        }
+    }
+
+    /* Create errored message */
+    this(Topic topic, ErrorCode err)
+    {
+        topic_ = topic;
+        rkmessage_ = &rkmessage_err_;
+        memset(&rkmessage_err_, 0, rkmessage_err_.sizeof);
+        rkmessage_err_.err = cast(rd_kafka_resp_err_t)(err);
+    }
+
+    /** The error string if object represent an error event,
    *           else an empty string. */
-  const(char)[] errstr() const {
-    /* FIXME: If there is an error string in payload (for consume_cb)
+    const(char)[] errstr() const
+    {
+        /* FIXME: If there is an error string in payload (for consume_cb)
      *        it wont be shown since 'payload' is reused for errstr
      *        and we cant distinguish between consumer and producer.
      *        For the producer case the payload needs to be the original
      *        payload pointer. */
-    return rd_kafka_err2str(rkmessage_.err).fromStringz;
-  }
+        return rd_kafka_err2str(rkmessage_.err).fromStringz;
+    }
 
-  /** The error code if object represents an error event, else 0. */
-  ErrorCode err () const
-  {
-    return cast(ErrorCode)rkmessage_.err;
-  }
+    /** The error code if object represents an error event, else 0. */
+    ErrorCode err() const
+    {
+        return cast(ErrorCode) rkmessage_.err;
+    }
 
-  /** the Topic object for a message (if applicable),
+    /** the Topic object for a message (if applicable),
    *            or null if a corresponding Topic object has not been
    *            explicitly created with Topic::create().
    *            In this case use topic_name() instead. */
-  const(Topic) topic () const
-  {
-    return topic_;
-  }
-  /** Topic name (if applicable, else empty string) */
-  const(char)[] topicName () const
-  {
-      if (rkmessage_.rkt)
-              return rd_kafka_topic_name(rkmessage_.rkt).fromStringz;
-      else
-              return "";
-  }
-  /** Partition (if applicable) */
-  int partition () const
-  {
-    return rkmessage_.partition;
-  }
-  /** Message payload (if applicable) */
-  const(void)[] payload () const
-  {
-    return rkmessage_.payload[0 .. rkmessage_.len];
-  }
-
-  /** Message key as string (if applicable) */
-  const(char)[] key () const {
-    return (cast(const(char)*)rkmessage_.key)[0 .. rkmessage_.key_len];
-  }
-
-  /** Message or error offset (if applicable) */
-  long offset () const
-  {
-    return rkmessage_.offset;
+    const(Topic) topic() const
+    {
+        return topic_;
+    }
+    /** Topic name (if applicable, else empty string) */
+    const(char)[] topicName() const
+    {
+        if (rkmessage_.rkt)
+            return rd_kafka_topic_name(rkmessage_.rkt).fromStringz;
+        else
+            return "";
+    }
+    /** Partition (if applicable) */
+    int partition() const
+    {
+        return rkmessage_.partition;
+    }
+    /** Message payload (if applicable) */
+    const(void)[] payload() const
+    {
+        return rkmessage_.payload[0 .. rkmessage_.len];
     }
 
-  /** Message timestamp (if applicable) */
-  MessageTimestamp timestamp () const {
-      MessageTimestamp ts;
-      rd_kafka_timestamp_type_t tstype;
-      ts.timestamp = rd_kafka_message_timestamp(rkmessage_, &tstype);
-      ts.type = cast(MessageTimestamp.Type)tstype;
-      return ts;
-  }
+    /** Message key as string (if applicable) */
+    const(char)[] key() const
+    {
+        return (cast(const(char)*) rkmessage_.key)[0 .. rkmessage_.key_len];
+    }
 
-  /** The \p msg_opaque as provided to Producer::produce() */
-  const(void)* msgOpaque () const { return rkmessage_._private; };
+    /** Message or error offset (if applicable) */
+    long offset() const
+    {
+        return rkmessage_.offset;
+    }
+
+    /** Message timestamp (if applicable) */
+    MessageTimestamp timestamp() const
+    {
+        MessageTimestamp ts;
+        rd_kafka_timestamp_type_t tstype;
+        ts.timestamp = rd_kafka_message_timestamp(rkmessage_, &tstype);
+        ts.type = cast(MessageTimestamp.Type) tstype;
+        return ts;
+    }
+
+    /** The \p msg_opaque as provided to Producer::produce() */
+    const(void)* msgOpaque() const
+    {
+        return rkmessage_._private;
+    };
 
 private:
-  Topic topic_;
-  const rd_kafka_message_t* rkmessage_;
-  bool free_rkmessage_;
-  /* For error signalling by the C++ layer the .._err_ message is
+    Topic topic_;
+    const rd_kafka_message_t* rkmessage_;
+    bool free_rkmessage_;
+    /* For error signalling by the C++ layer the .._err_ message is
    * used as a place holder and rkmessage_ is set to point to it. */
-  rd_kafka_message_t rkmessage_err_;
+    rd_kafka_message_t rkmessage_err_;
 }
-
-
 
 /**
  * Queue interface
@@ -1650,24 +1668,25 @@ private:
  * Consumer::consumeCallback() methods that take a queue as the first
  * parameter for more information.
  */
-class Queue {
+class Queue
+{
 nothrow @nogc:
-  /**
+    /**
    * Create Queue object
    */
-  this(Handle handle)
-  {
-      queue_ = rd_kafka_queue_new(handle.rk_);
-  }
+    this(Handle handle)
+    {
+        queue_ = rd_kafka_queue_new(handle.rk_);
+    }
 
-  ~this () {
-    rd_kafka_queue_destroy(queue_);
-  }
+    ~this()
+    {
+        rd_kafka_queue_destroy(queue_);
+    }
 
 private:
-  rd_kafka_queue_t* queue_;
+    rd_kafka_queue_t* queue_;
 }
-
 
 /**
  * High-level KafkaConsumer (for brokers 0.9 and later)
@@ -1679,7 +1698,7 @@ private:
  */
 class KafkaConsumer : Handle
 {
-  /**
+    /**
    * Creates a KafkaConsumer.
    *
    * The \p conf object must have \c group.id set to the consumer group to join.
@@ -1690,81 +1709,83 @@ class KafkaConsumer : Handle
    * @sa CONFIGURATION.md for \c group.id, \c session.timeout.ms,
    *     \c partition.assignment.strategy, etc.
    */
-  this(GlobalConf conf)
-  {
-      char[512] errbuf = void;
-      rd_kafka_conf_t* rk_conf = null;
-      size_t grlen;
-
-      if (!conf.rk_conf_) {
-        throw new Exception("Requires Conf::CONF_GLOBAL object");
-      }
-
-      if (rd_kafka_conf_get(conf.rk_conf_, "group.id",
-                            null, &grlen) != rd_kafka_conf_res_t.RD_KAFKA_CONF_OK ||
-          grlen <= 1 /* terminating null only */) {
-        throw new Exception("\"group.id\" must be configured");
-      }
-
-      this.setCommonConfig(conf);
-
-      rk_conf = rd_kafka_conf_dup(conf.rk_conf_);
-
-      rd_kafka_t* rk;
-      if (null is (rk = rd_kafka_new(rd_kafka_type_t.RD_KAFKA_CONSUMER, rk_conf,
-                              errbuf.ptr, errbuf.sizeof))) {
-        throw new Exception(cast(string)errbuf.ptr.fromStringz);
-      }
-
-      this.rk_ = rk;
-
-      /* Redirect handle queue to cgrp's queue to provide a single queue point */
-      rd_kafka_poll_set_consumer(rk);
-  }
-
-  /** Returns the current partition assignment as set by
-   *         assign() */
-   ErrorCode assignment (ref TopicPartition[] partitions) nothrow
+    this(GlobalConf conf)
     {
-      rd_kafka_topic_partition_list_t* c_parts;
-      rd_kafka_resp_err_t err;
+        char[512] errbuf = void;
+        rd_kafka_conf_t* rk_conf = null;
+        size_t grlen;
 
-      if (0 != (err = rd_kafka_assignment(rk_, &c_parts)))
-        return cast(ErrorCode)err;
+        if (!conf.rk_conf_)
+        {
+            throw new Exception("Requires Conf::CONF_GLOBAL object");
+        }
 
-      partitions.length = c_parts.cnt;
+        if (rd_kafka_conf_get(conf.rk_conf_, "group.id", null,
+                &grlen) != rd_kafka_conf_res_t.RD_KAFKA_CONF_OK || grlen <= 1 /* terminating null only */ )
+        {
+            throw new Exception("\"group.id\" must be configured");
+        }
 
-      foreach (i, ref p; partitions)
-        p = TopicPartition(&c_parts.elems[i]);
+        this.setCommonConfig(conf);
 
-      rd_kafka_topic_partition_list_destroy(c_parts);
+        rk_conf = rd_kafka_conf_dup(conf.rk_conf_);
 
-      return ErrorCode.NO_ERROR;
+        rd_kafka_t* rk;
+        if (null is(rk = rd_kafka_new(rd_kafka_type_t.RD_KAFKA_CONSUMER, rk_conf,
+                errbuf.ptr, errbuf.sizeof)))
+        {
+            throw new Exception(cast(string) errbuf.ptr.fromStringz);
+        }
+
+        this.rk_ = rk;
+
+        /* Redirect handle queue to cgrp's queue to provide a single queue point */
+        rd_kafka_poll_set_consumer(rk);
+    }
+
+    /** Returns the current partition assignment as set by
+   *         assign() */
+    ErrorCode assignment(ref TopicPartition[] partitions) nothrow
+    {
+        rd_kafka_topic_partition_list_t* c_parts;
+        rd_kafka_resp_err_t err;
+
+        if (0 != (err = rd_kafka_assignment(rk_, &c_parts)))
+            return cast(ErrorCode) err;
+
+        partitions.length = c_parts.cnt;
+
+        foreach (i, ref p; partitions)
+            p = TopicPartition(&c_parts.elems[i]);
+
+        rd_kafka_topic_partition_list_destroy(c_parts);
+
+        return ErrorCode.NO_ERROR;
 
     }
 
-  /** Returns the current subscription as set by
+    /** Returns the current subscription as set by
    *         subscribe() */
-   ErrorCode subscription (ref string[] topics) nothrow
-   {
-  rd_kafka_topic_partition_list_t* c_topics;
-  rd_kafka_resp_err_t err;
+    ErrorCode subscription(ref string[] topics) nothrow
+    {
+        rd_kafka_topic_partition_list_t* c_topics;
+        rd_kafka_resp_err_t err;
 
-  if (0 != (err = rd_kafka_subscription(rk_, &c_topics)))
-    return cast(ErrorCode)err;
+        if (0 != (err = rd_kafka_subscription(rk_, &c_topics)))
+            return cast(ErrorCode) err;
 
-  topics.length = c_topics.cnt;
-  for (int i = 0 ; i < c_topics.cnt ; i++)
-    topics[i] = cast(string)c_topics.elems[i].topic.fromStringz;
+        topics.length = c_topics.cnt;
+        for (int i = 0; i < c_topics.cnt; i++)
+            topics[i] = cast(string) c_topics.elems[i].topic.fromStringz;
 
-  rd_kafka_topic_partition_list_destroy(c_topics);
+        rd_kafka_topic_partition_list_destroy(c_topics);
 
-  return ErrorCode.NO_ERROR;
-   }
+        return ErrorCode.NO_ERROR;
+    }
 
 nothrow @nogc:
 
-  /**
+    /**
    * Update the subscription set to \p topics.
    *
    * Any previous subscription will be unassigned and  unsubscribed first.
@@ -1786,31 +1807,30 @@ nothrow @nogc:
    * Regex pattern matching automatically performed for topics prefixed
    * with \c \"^\" (e.g. \c \"^myPfx[0-9]_.*\"
    */
-  ErrorCode subscribe (const(char)*[] topics...)
-  {
-      rd_kafka_topic_partition_list_t* c_topics;
-  rd_kafka_resp_err_t err;
+    ErrorCode subscribe(const(char)*[] topics...)
+    {
+        rd_kafka_topic_partition_list_t* c_topics;
+        rd_kafka_resp_err_t err;
 
-  c_topics = rd_kafka_topic_partition_list_new(cast(int)topics.length);
+        c_topics = rd_kafka_topic_partition_list_new(cast(int) topics.length);
 
-  for (uint i = 0 ; i < topics.length ; i++)
-    rd_kafka_topic_partition_list_add(c_topics, topics[i],
-                                      RD_KAFKA_PARTITION_UA);
+        for (uint i = 0; i < topics.length; i++)
+            rd_kafka_topic_partition_list_add(c_topics, topics[i], RD_KAFKA_PARTITION_UA);
 
-  err = rd_kafka_subscribe(rk_, c_topics);
+        err = rd_kafka_subscribe(rk_, c_topics);
 
-  rd_kafka_topic_partition_list_destroy(c_topics);
+        rd_kafka_topic_partition_list_destroy(c_topics);
 
-  return cast(ErrorCode)err;
+        return cast(ErrorCode) err;
 
-  }
-  /** Unsubscribe from the current subscription set. */
-  nothrow @nogc ErrorCode unsubscribe ()
-  {
-      return cast(ErrorCode)(rd_kafka_unsubscribe(this.rk_));
-  }
+    }
+    /** Unsubscribe from the current subscription set. */
+    nothrow @nogc ErrorCode unsubscribe()
+    {
+        return cast(ErrorCode)(rd_kafka_unsubscribe(this.rk_));
+    }
 
-  /**
+    /**
    * Consume message or get error event, triggers callbacks.
    *
    * Will automatically call registered callbacks for any such queued events,
@@ -1834,47 +1854,47 @@ nothrow @nogc:
    *  - timeout due to no message or event in \p timeout_ms
    *    (Message::err() is TIMED_OUT)
    */
-  nothrow @nogc void consume (int timeout_ms, out Message msg)
-  {
-      rd_kafka_message_t* rkmessage;
+    nothrow @nogc void consume(int timeout_ms, out Message msg)
+    {
+        rd_kafka_message_t* rkmessage;
 
-      rkmessage = rd_kafka_consumer_poll(this.rk_, timeout_ms);
+        rkmessage = rd_kafka_consumer_poll(this.rk_, timeout_ms);
 
-      if (!rkmessage)
-        msg = Message(null, ErrorCode._TIMED_OUT);
+        if (!rkmessage)
+            msg = Message(null, ErrorCode._TIMED_OUT);
 
-      msg = Message(rkmessage);
+        msg = Message(rkmessage);
 
-  }
+    }
 
-  /**
+    /**
    *  Update the assignment set to \p partitions.
    *
    * The assignment set is the set of partitions actually being consumed
    * by the KafkaConsumer.
    */
-   ErrorCode assign (const TopicPartition[] partitions)
-   {
-      rd_kafka_topic_partition_list_t* c_parts;
-      rd_kafka_resp_err_t err;
+    ErrorCode assign(const TopicPartition[] partitions)
+    {
+        rd_kafka_topic_partition_list_t* c_parts;
+        rd_kafka_resp_err_t err;
 
-      c_parts = partitions_to_c_parts(partitions);
+        c_parts = partitions_to_c_parts(partitions);
 
-      err = rd_kafka_assign(rk_, c_parts);
+        err = rd_kafka_assign(rk_, c_parts);
 
-      rd_kafka_topic_partition_list_destroy(c_parts);
-      return cast(ErrorCode)err;
-   }
+        rd_kafka_topic_partition_list_destroy(c_parts);
+        return cast(ErrorCode) err;
+    }
 
-  /**
+    /**
    * Stop consumption and remove the current assignment.
    */
-   nothrow @nogc ErrorCode unassign ()
-   {
-        return cast(ErrorCode)rd_kafka_assign(rk_, null);
-   }
+    nothrow @nogc ErrorCode unassign()
+    {
+        return cast(ErrorCode) rd_kafka_assign(rk_, null);
+    }
 
-  /**
+    /**
    * Commit offsets for the current assignment.
    *
    * @remark This is the synchronous variant that blocks until offsets
@@ -1887,80 +1907,75 @@ nothrow @nogc:
    *
    * ERR_NO_ERROR or error code.
    */
-   nothrow @nogc ErrorCode commitSync ()
-   {
-    return cast(ErrorCode)rd_kafka_commit(rk_, null, 0/*sync*/);
+    nothrow @nogc ErrorCode commitSync()
+    {
+        return cast(ErrorCode) rd_kafka_commit(rk_, null, 0 /*sync*/ );
 
-   }
+    }
 
-  /**
+    /**
    * Asynchronous version of CommitSync()
    *
    * @sa KafkaConsummer::commitSync()
    */
-   nothrow @nogc ErrorCode commitAsync ()
-   {
-    return cast(ErrorCode)rd_kafka_commit(rk_, null, 1/*async*/);
-   }
+    nothrow @nogc ErrorCode commitAsync()
+    {
+        return cast(ErrorCode) rd_kafka_commit(rk_, null, 1 /*async*/ );
+    }
 
-  /**
+    /**
    * Commit offset for a single topic+partition based on \p message
    *
    * @remark This is the synchronous variant.
    *
    * @sa KafkaConsummer::commitSync()
    */
-   nothrow @nogc ErrorCode commitSync (ref Message message)
-   {
-      return cast(ErrorCode)rd_kafka_commit_message(rk_, message.rkmessage_, 0/*sync*/);
-   }
+    nothrow @nogc ErrorCode commitSync(ref Message message)
+    {
+        return cast(ErrorCode) rd_kafka_commit_message(rk_, message.rkmessage_, 0 /*sync*/ );
+    }
 
-  /**
+    /**
    * Commit offset for a single topic+partition based on \p message
    *
    * @remark This is the asynchronous variant.
    *
    * @sa KafkaConsummer::commitSync()
    */
-   nothrow @nogc ErrorCode commitAsync (ref Message message)
-   {
-      return cast(ErrorCode)rd_kafka_commit_message(rk_, message.rkmessage_,1/*async*/);
-   }
+    nothrow @nogc ErrorCode commitAsync(ref Message message)
+    {
+        return cast(ErrorCode) rd_kafka_commit_message(rk_, message.rkmessage_, 1 /*async*/ );
+    }
 
-  /**
+    /**
    * Commit offsets for the provided list of partitions.
    *
    * @remark This is the synchronous variant.
    */
-   ErrorCode commitSync (TopicPartition[] offsets)
-   {
-        rd_kafka_topic_partition_list_t* c_parts =
-          partitions_to_c_parts(offsets);
-      rd_kafka_resp_err_t err =
-          rd_kafka_commit(rk_, c_parts, 0);
-      if (!err)
-          update_partitions_from_c_parts(offsets, c_parts);
-      rd_kafka_topic_partition_list_destroy(c_parts);
-      return cast(ErrorCode)err;
-   }
+    ErrorCode commitSync(TopicPartition[] offsets)
+    {
+        rd_kafka_topic_partition_list_t* c_parts = partitions_to_c_parts(offsets);
+        rd_kafka_resp_err_t err = rd_kafka_commit(rk_, c_parts, 0);
+        if (!err)
+            update_partitions_from_c_parts(offsets, c_parts);
+        rd_kafka_topic_partition_list_destroy(c_parts);
+        return cast(ErrorCode) err;
+    }
 
-  /**
+    /**
    * Commit offset for the provided list of partitions.
    *
    * @remark This is the asynchronous variant.
    */
-   ErrorCode commitAsync (const TopicPartition[] offsets)
-   {
-      rd_kafka_topic_partition_list_t* c_parts =
-          partitions_to_c_parts(offsets);
-      rd_kafka_resp_err_t err =
-          rd_kafka_commit(rk_, c_parts, 1);
-      rd_kafka_topic_partition_list_destroy(c_parts);
-      return cast(ErrorCode)err;
-   }
+    ErrorCode commitAsync(const TopicPartition[] offsets)
+    {
+        rd_kafka_topic_partition_list_t* c_parts = partitions_to_c_parts(offsets);
+        rd_kafka_resp_err_t err = rd_kafka_commit(rk_, c_parts, 1);
+        rd_kafka_topic_partition_list_destroy(c_parts);
+        return cast(ErrorCode) err;
+    }
 
-
-  /**
+    /**
    * Retrieve committed offsets for topics+partitions.
    *
    * RD_KAFKA_RESP_ERR_NO_ERROR on success in which case the
@@ -1968,26 +1983,26 @@ nothrow @nogc:
    *          in with the stored offset, or a partition specific error.
    *          Else returns an error code.
    */
-   ErrorCode committed (TopicPartition[] partitions,
-             int timeout_ms)
-   {
-      rd_kafka_topic_partition_list_t* c_parts;
-      rd_kafka_resp_err_t err;
+    ErrorCode committed(TopicPartition[] partitions, int timeout_ms)
+    {
+        rd_kafka_topic_partition_list_t* c_parts;
+        rd_kafka_resp_err_t err;
 
-      c_parts = partitions_to_c_parts(partitions);
+        c_parts = partitions_to_c_parts(partitions);
 
-      err = rd_kafka_committed(rk_, c_parts, timeout_ms);
+        err = rd_kafka_committed(rk_, c_parts, timeout_ms);
 
-      if (!err) {
-        update_partitions_from_c_parts(partitions, c_parts);
-      }
+        if (!err)
+        {
+            update_partitions_from_c_parts(partitions, c_parts);
+        }
 
-      rd_kafka_topic_partition_list_destroy(c_parts);
+        rd_kafka_topic_partition_list_destroy(c_parts);
 
-      return cast(ErrorCode)err;
-   }
+        return cast(ErrorCode) err;
+    }
 
-  /**
+    /**
    * Retrieve current positions (offsets) for topics+partitions.
    *
    * RD_KAFKA_RESP_ERR_NO_ERROR on success in which case the
@@ -1995,26 +2010,27 @@ nothrow @nogc:
    *          in with the stored offset, or a partition specific error.
    *          Else returns an error code.
    */
-   ErrorCode position (TopicPartition[] partitions)
-   {
-          rd_kafka_topic_partition_list_t* c_parts;
-  rd_kafka_resp_err_t err;
+    ErrorCode position(TopicPartition[] partitions)
+    {
+        rd_kafka_topic_partition_list_t* c_parts;
+        rd_kafka_resp_err_t err;
 
-  c_parts = partitions_to_c_parts(partitions);
+        c_parts = partitions_to_c_parts(partitions);
 
-  err = rd_kafka_position(rk_, c_parts);
+        err = rd_kafka_position(rk_, c_parts);
 
-  if (!err) {
-    update_partitions_from_c_parts(partitions, c_parts);
-  }
+        if (!err)
+        {
+            update_partitions_from_c_parts(partitions, c_parts);
+        }
 
-  rd_kafka_topic_partition_list_destroy(c_parts);
+        rd_kafka_topic_partition_list_destroy(c_parts);
 
-  return cast(ErrorCode)err;
+        return cast(ErrorCode) err;
 
-   }
+    }
 
-  /**
+    /**
    * Close and shut down the proper.
    *
    * This call will block until the following operations are finished:
@@ -2030,19 +2046,19 @@ nothrow @nogc:
    *
    * @remark The consumer object must later be freed with \c delete
    */
-   ErrorCode close ()
-   {
-      rd_kafka_resp_err_t err;
-      err = rd_kafka_consumer_close(rk_);
-      if (err)
-        return cast(ErrorCode)err;
+    ErrorCode close()
+    {
+        rd_kafka_resp_err_t err;
+        err = rd_kafka_consumer_close(rk_);
+        if (err)
+            return cast(ErrorCode) err;
 
-      while (rd_kafka_outq_len(rk_) > 0)
-        rd_kafka_poll(rk_, 10);
-      rd_kafka_destroy(rk_);
+        while (rd_kafka_outq_len(rk_) > 0)
+            rd_kafka_poll(rk_, 10);
+        rd_kafka_destroy(rk_);
 
-      return cast(ErrorCode)err;
-   }
+        return cast(ErrorCode) err;
+    }
 }
 
 /**
@@ -2052,7 +2068,7 @@ nothrow @nogc:
  */
 class Consumer : Handle
 {
-  /**
+    /**
    * Creates a new Kafka consumer handle.
    *
    * \p conf is an optional object that will be used instead of the default
@@ -2062,36 +2078,40 @@ class Consumer : Handle
    * the new handle on success or null on error in which case
    * \p errstr is set to a human readable error message.
    */
-  this (GlobalConf conf)
-  {
-      char[512] errbuf = void;
-      rd_kafka_conf_t* rk_conf = null;
+    this(GlobalConf conf)
+    {
+        char[512] errbuf = void;
+        rd_kafka_conf_t* rk_conf = null;
 
-      if (conf) {
-        if (!conf.rk_conf_) {
-          throw new Exception("Requires Conf::CONF_GLOBAL object");
+        if (conf)
+        {
+            if (!conf.rk_conf_)
+            {
+                throw new Exception("Requires Conf::CONF_GLOBAL object");
+            }
+
+            this.setCommonConfig(conf);
+
+            rk_conf = rd_kafka_conf_dup(conf.rk_conf_);
         }
 
-        this.setCommonConfig(conf);
-
-        rk_conf = rd_kafka_conf_dup(conf.rk_conf_);
-      }
-
-      if (null is (rk_ = rd_kafka_new(rd_kafka_type_t.RD_KAFKA_CONSUMER, rk_conf, errbuf.ptr, errbuf.sizeof))) {
-        throw new Exception(cast(string)errbuf.ptr.fromStringz);
-      }
-  }
+        if (null is(rk_ = rd_kafka_new(rd_kafka_type_t.RD_KAFKA_CONSUMER,
+                rk_conf, errbuf.ptr, errbuf.sizeof)))
+        {
+            throw new Exception(cast(string) errbuf.ptr.fromStringz);
+        }
+    }
 
 nothrow @nogc:
 
-    ~this() 
+     ~this()
     {
         rd_kafka_destroy(rk_);
     }
 
 static:
 
-  /**
+    /**
    * Start consuming messages for topic and \p partition
    * at offset \p offset which may either be a proper offset (0..N)
    * or one of the the special offsets: \p OFFSET_BEGINNING or \p OFFSET_END.
@@ -2110,15 +2130,14 @@ static:
    *
    * an ErrorCode to indicate success or failure.
    */
-   ErrorCode start (Topic topic, int partition, long offset,
-                           Queue queue)
-   {
-       if (rd_kafka_consume_start(topic.rkt_, partition, offset) == -1)
-        return cast(ErrorCode)(rd_kafka_errno2err(errno));
-      return ErrorCode.NO_ERROR;
-   }
+    ErrorCode start(Topic topic, int partition, long offset, Queue queue)
+    {
+        if (rd_kafka_consume_start(topic.rkt_, partition, offset) == -1)
+            return cast(ErrorCode)(rd_kafka_errno2err(errno));
+        return ErrorCode.NO_ERROR;
+    }
 
-  /**
+    /**
    * Stop consuming messages for topic and \p partition, purging
    *        all messages currently in the local queue.
    *
@@ -2127,14 +2146,14 @@ static:
    *
    * an ErrorCode to indicate success or failure.
    */
-   ErrorCode stop (Topic topic, int partition)
-   {
-      if (rd_kafka_consume_stop(topic.rkt_, partition) == -1)
-        return cast(ErrorCode)(rd_kafka_errno2err(errno));
-      return ErrorCode.NO_ERROR;
-   }
+    ErrorCode stop(Topic topic, int partition)
+    {
+        if (rd_kafka_consume_stop(topic.rkt_, partition) == -1)
+            return cast(ErrorCode)(rd_kafka_errno2err(errno));
+        return ErrorCode.NO_ERROR;
+    }
 
-  /**
+    /**
    * Seek consumer for topic+partition to \p offset which is either an
    *        absolute or logical offset.
    *
@@ -2148,15 +2167,14 @@ static:
    *
    * an ErrorCode to indicate success or failure.
    */
-   ErrorCode seek (Topic topic, int partition, long offset,
-        int timeout_ms)
-   {
-      if (rd_kafka_seek(topic.rkt_, partition, offset, timeout_ms) == -1)
-        return cast(ErrorCode)(rd_kafka_errno2err(errno));
-      return ErrorCode.NO_ERROR;
-   }
+    ErrorCode seek(Topic topic, int partition, long offset, int timeout_ms)
+    {
+        if (rd_kafka_seek(topic.rkt_, partition, offset, timeout_ms) == -1)
+            return cast(ErrorCode)(rd_kafka_errno2err(errno));
+        return ErrorCode.NO_ERROR;
+    }
 
-  /**
+    /**
    * Consume a single message from \p topic and \p partition.
    *
    * \p timeout_ms is maximum amount of time to wait for a message to be
@@ -2173,19 +2191,18 @@ static:
    *  - TIMED_OUT - \p timeout_ms was reached with no new messages fetched.
    *  - PARTITION_EOF - End of partition reached, not an error.
    */
-   void consume (Topic topic, int partition,
-                            int timeout_ms, out Message msg)
-   {
-      rd_kafka_message_t* rkmessage;
+    void consume(Topic topic, int partition, int timeout_ms, out Message msg)
+    {
+        rd_kafka_message_t* rkmessage;
 
-      rkmessage = rd_kafka_consume(topic.rkt_, partition, timeout_ms);
-      if (!rkmessage)
-        msg = Message(topic, cast(ErrorCode) rd_kafka_errno2err(errno));
+        rkmessage = rd_kafka_consume(topic.rkt_, partition, timeout_ms);
+        if (!rkmessage)
+            msg = Message(topic, cast(ErrorCode) rd_kafka_errno2err(errno));
 
-      msg = Message(topic, rkmessage);
-   }
+        msg = Message(topic, rkmessage);
+    }
 
-  /**
+    /**
    * Consume a single message from the specified queue.
    *
    * \p timeout_ms is maximum amount of time to wait for a message to be
@@ -2206,42 +2223,44 @@ static:
    * errors, so applications should check that it isn't null before
    * dereferencing it.
    */
-   void consume (Queue queue, int timeout_ms, out Message msg)
-   {
-      rd_kafka_message_t* rkmessage;
-      rkmessage = rd_kafka_consume_queue(queue.queue_, timeout_ms);
-      if (!rkmessage)
-        msg = Message(null, cast(ErrorCode)rd_kafka_errno2err(errno));
-      /*
+    void consume(Queue queue, int timeout_ms, out Message msg)
+    {
+        rd_kafka_message_t* rkmessage;
+        rkmessage = rd_kafka_consume_queue(queue.queue_, timeout_ms);
+        if (!rkmessage)
+            msg = Message(null, cast(ErrorCode) rd_kafka_errno2err(errno));
+        /*
        * Recover our Topic from the topic conf's opaque field, which we
        * set in Topic::create() for just this kind of situation.
        */
-      void* opaque = rd_kafka_topic_opaque(rkmessage.rkt);
-      Topic topic = cast(Topic)(opaque);
+        void* opaque = rd_kafka_topic_opaque(rkmessage.rkt);
+        Topic topic = cast(Topic)(opaque);
 
-      msg = Message(topic, rkmessage);
-   }
+        msg = Message(topic, rkmessage);
+    }
 
-  /* Helper struct for `consume_callback'.
+    /* Helper struct for `consume_callback'.
    * Encapsulates the values we need in order to call `rd_kafka_consume_callback'
    * and keep track of the C++ callback function and `opaque' value.
    */
-  private static struct ConsumerCallback {
-    /* This function is the one we give to `rd_kafka_consume_callback', with
+    private static struct ConsumerCallback
+    {
+        /* This function is the one we give to `rd_kafka_consume_callback', with
      * the `opaque' pointer pointing to an instance of this struct, in which
      * we can find the C++ callback and `cb_data'.
      */
-    static nothrow @nogc
-    void consume_cb_trampoline(rd_kafka_message_t* msg, void* opaque) {
-      ConsumerCallback* instance = cast(ConsumerCallback*)opaque;
-      Message message = Message(instance.topic, msg, false /*don't free*/);
-      instance.cb_cls(message);
-    }
-    Topic topic;
-    ConsumeCb cb_cls;
-  }
+        static nothrow @nogc void consume_cb_trampoline(rd_kafka_message_t* msg, void* opaque)
+        {
+            ConsumerCallback* instance = cast(ConsumerCallback*) opaque;
+            Message message = Message(instance.topic, msg, false  /*don't free*/ );
+            instance.cb_cls(message);
+        }
 
-  /**
+        Topic topic;
+        ConsumeCb cb_cls;
+    }
+
+    /**
    * Consumes messages from \p topic and \p partition, calling
    *        the provided callback for each consumed messsage.
    *
@@ -2260,53 +2279,54 @@ static:
    *
    * @sa Consumer::consume()
    */
-   int consumeCallback (Topic topic, int partition, int timeout_ms, ConsumeCb consume_cb)
-   {
+    int consumeCallback(Topic topic, int partition, int timeout_ms, ConsumeCb consume_cb)
+    {
         auto context = ConsumerCallback(topic, consume_cb);
         return rd_kafka_consume_callback(topic.rkt_, partition, timeout_ms,
-                                         &ConsumerCallback.consume_cb_trampoline, &context);
-   }
+            &ConsumerCallback.consume_cb_trampoline, &context);
+    }
 
-  /* Helper struct for `consume_callback' with a Queue.
+    /* Helper struct for `consume_callback' with a Queue.
    * Encapsulates the values we need in order to call `rd_kafka_consume_callback'
    * and keep track of the C++ callback function and `opaque' value.
    */
-  private static struct ConsumerQueueCallback {
-    /* This function is the one we give to `rd_kafka_consume_callback', with
+    private static struct ConsumerQueueCallback
+    {
+        /* This function is the one we give to `rd_kafka_consume_callback', with
      * the `opaque' pointer pointing to an instance of this struct, in which
      * we can find the C++ callback and `cb_data'.
      */
-    static nothrow @nogc
-    void consume_cb_trampoline(rd_kafka_message_t* msg, void* opaque) {
-      ConsumerQueueCallback* instance = cast(ConsumerQueueCallback*)opaque;
-      /*
+        static nothrow @nogc void consume_cb_trampoline(rd_kafka_message_t* msg, void* opaque)
+        {
+            ConsumerQueueCallback* instance = cast(ConsumerQueueCallback*) opaque;
+            /*
        * Recover our Topic from the topic conf's opaque field, which we
        * set in Topic::create() for just this kind of situation.
        */
-      void* topic_opaque = rd_kafka_topic_opaque(msg.rkt);
-      Topic topic = cast(Topic)topic_opaque;
-      Message message = Message(topic, msg, false /*don't free*/);
-      instance.cb_cls(message);
-    }
-    ConsumeCb cb_cls;
-  }
+            void* topic_opaque = rd_kafka_topic_opaque(msg.rkt);
+            Topic topic = cast(Topic) topic_opaque;
+            Message message = Message(topic, msg, false  /*don't free*/ );
+            instance.cb_cls(message);
+        }
 
-  /**
+        ConsumeCb cb_cls;
+    }
+
+    /**
    * Consumes messages from \p queue, calling the provided callback for
    *        each consumed messsage.
    *
    * @sa Consumer::consumeCallback()
    */
 
-    int consumeCallback (Queue queue, int timeout_ms, ConsumeCb consume_cb)
+    int consumeCallback(Queue queue, int timeout_ms, ConsumeCb consume_cb)
     {
-    auto context = ConsumerQueueCallback(consume_cb);
-    return rd_kafka_consume_callback_queue(queue.queue_, timeout_ms,
-                                           &ConsumerQueueCallback.consume_cb_trampoline,
-                                           &context);
+        auto context = ConsumerQueueCallback(consume_cb);
+        return rd_kafka_consume_callback_queue(queue.queue_, timeout_ms,
+            &ConsumerQueueCallback.consume_cb_trampoline, &context);
     }
 
-  /**
+    /**
    * Converts an offset into the logical offset from the tail of a topic.
    *
    * \p offset is the (positive) number of items from the end.
@@ -2315,19 +2335,18 @@ static:
    *          may be passed to Consumer::start, et.al.
    * @remark The returned logical offset is specific to librdkafka.
    */
-  long offsetTail(long offset)
-  {
-      return RD_KAFKA_OFFSET_TAIL(offset);
-  }
+    long offsetTail(long offset)
+    {
+        return RD_KAFKA_OFFSET_TAIL(offset);
+    }
 }
-
 
 /**
  * Producer
  */
 class Producer : Handle
 {
-  /**
+    /**
    * Creates a new Kafka producer handle.
    *
    * \p conf is an optional object that will be used instead of the default
@@ -2337,64 +2356,66 @@ class Producer : Handle
    * the new handle on success or null on error in which case
    *          \p errstr is set to a human readable error message.
    */
-  this (GlobalConf conf, ref char[] errstr)
-  {
+    this(GlobalConf conf, ref char[] errstr)
+    {
 
-    char[512] errbuf = void;
-    rd_kafka_conf_t* rk_conf = null;
+        char[512] errbuf = void;
+        rd_kafka_conf_t* rk_conf = null;
 
-    if (conf) {
-      if (!conf.rk_conf_) {
-        throw new Exception("Requires Conf::CONF_GLOBAL object");
-      }
+        if (conf)
+        {
+            if (!conf.rk_conf_)
+            {
+                throw new Exception("Requires Conf::CONF_GLOBAL object");
+            }
 
-      this.setCommonConfig(conf);
+            this.setCommonConfig(conf);
 
-      rk_conf = rd_kafka_conf_dup(conf.rk_conf_);
+            rk_conf = rd_kafka_conf_dup(conf.rk_conf_);
 
-      if (conf.dr_cb_) {
-        rd_kafka_conf_set_dr_msg_cb(rk_conf, &dr_msg_cb_trampoline);
-        this.dr_cb_ = conf.dr_cb_;
-      }
+            if (conf.dr_cb_)
+            {
+                rd_kafka_conf_set_dr_msg_cb(rk_conf, &dr_msg_cb_trampoline);
+                this.dr_cb_ = conf.dr_cb_;
+            }
+        }
+
+        if (null is(rk_ = rd_kafka_new(rd_kafka_type_t.RD_KAFKA_PRODUCER,
+                rk_conf, errbuf.ptr, errbuf.sizeof)))
+        {
+            throw new Exception(cast(string) errbuf.ptr.fromStringz);
+        }
     }
 
+nothrow @nogc:
 
-    if (null is (rk_ = rd_kafka_new(rd_kafka_type_t.RD_KAFKA_PRODUCER, rk_conf,
-                            errbuf.ptr, errbuf.sizeof))) {
-      throw new Exception(cast(string)errbuf.ptr.fromStringz);
-    }
-  }
-
-  nothrow @nogc:
-
-    ~this () {
+     ~this()
+    {
         if (rk_)
             rd_kafka_destroy(rk_);
     }
 
-    private static void dr_msg_cb_trampoline (rd_kafka_t* rk,
-                                      const rd_kafka_message_t* 
-                                      rkmessage,
-                                      void *opaque) {
-      auto handle = cast(Handle)opaque;
-      auto message = Message(null, rkmessage);
-      handle.dr_cb_(message);
-      message.destroy;
+    private static void dr_msg_cb_trampoline(rd_kafka_t* rk,
+        const rd_kafka_message_t* rkmessage, void* opaque)
+    {
+        auto handle = cast(Handle) opaque;
+        auto message = Message(null, rkmessage);
+        handle.dr_cb_(message);
+        message.destroy;
     }
 
-
-  /**
+    /**
    * Producer::produce() \p msgflags
    *
    * These flags are optional and mutually exclusive.
    */
-  enum int RK_MSG_FREE = 0x1; /**< rdkafka will free(3) \p payload
+    enum int RK_MSG_FREE = 0x1; /**< rdkafka will free(3) \p payload
                                         * when it is done with it. */
-  enum int RK_MSG_COPY = 0x2; /**< the \p payload data will be copied
+    enum int RK_MSG_COPY = 0x2; /**< the \p payload data will be copied
                                        * and the \p payload pointer will not
                                        * be used by rdkafka after the
                                        * call returns. */
-  enum int RK_MSG_BLOCK = 0x4; /**< Block produce*() on message queue
+    enum int RK_MSG_BLOCK = 0x4; /**< Block produce*() on message queue
           *   full.
           *   WARNING:
           *   If a delivery report callback
@@ -2409,15 +2430,14 @@ class Producer : Handle
           *   message queue is full.
           */
 
-
-  /* For backwards compatibility: */
-    static if(!is(typeof(MSG_COPY))) /* defined in sys/msg.h */
+    /* For backwards compatibility: */
+    static if (!is(typeof(MSG_COPY))) /* defined in sys/msg.h */
     {
-      enum int MSG_FREE = RK_MSG_FREE;
-      enum int MSG_COPY = RK_MSG_COPY;
+        enum int MSG_FREE = RK_MSG_FREE;
+        enum int MSG_COPY = RK_MSG_COPY;
     }
 
-  /**
+    /**
    * Produce and send a single message to broker.
    *
    * This is an asynch non-blocking API.
@@ -2471,24 +2491,22 @@ class Producer : Handle
    *
    *  - UNKNOWN_TOPIC     - topic is unknown in the Kafka cluster.
    */
-  /**
+    /**
    * Variant produce() that passes the key as a pointer and length
    *        instead of as a const(char)[] *.
    */
-   ErrorCode produce (Topic topic, int partition,
-                             int msgflags,
-                             void[] payload,
-                             const(char[]) key,
-                             void* msg_opaque)
-   {
-      if (rd_kafka_produce(topic.rkt_, partition, msgflags, payload.ptr, payload.length, key.ptr, key.length, msg_opaque) == -1)
-        return cast(ErrorCode)rd_kafka_errno2err(errno);
+    ErrorCode produce(Topic topic, int partition, int msgflags, void[] payload,
+        const(char[]) key, void* msg_opaque)
+    {
+        if (rd_kafka_produce(topic.rkt_, partition, msgflags, payload.ptr,
+                payload.length, key.ptr, key.length, msg_opaque) == -1)
+            return cast(ErrorCode) rd_kafka_errno2err(errno);
 
-      return ErrorCode.NO_ERROR;
+        return ErrorCode.NO_ERROR;
 
-   }
+    }
 
-  /**
+    /**
    * Wait until all outstanding produce requests, et.al, are completed.
    *        This should typically be done prior to destroying a producer instance
    *        to make sure all queued and in-flight produce requests are completed
@@ -2499,12 +2517,11 @@ class Producer : Handle
    * TIMED_OUT if \p timeout_ms was reached before all
    *          outstanding requests were completed, else ERR_NO_ERROR
    */
-   ErrorCode flush (int timeout_ms)
-   {
-        return cast(ErrorCode)rd_kafka_flush(rk_, timeout_ms);
-   }
+    ErrorCode flush(int timeout_ms)
+    {
+        return cast(ErrorCode) rd_kafka_flush(rk_, timeout_ms);
+    }
 }
-
 
 /**
  * Metadata: Broker information
@@ -2513,24 +2530,28 @@ struct BrokerMetadata
 {
 nothrow @nogc:
 
-  /** Broker id */
-  int      id() const{return broker_metadata_.id;}
+    /** Broker id */
+    int id() const
+    {
+        return broker_metadata_.id;
+    }
 
-  /** Broker hostname */
-  const(char)[] host() const {return broker_metadata_.host.fromStringz;}
+    /** Broker hostname */
+    const(char)[] host() const
+    {
+        return broker_metadata_.host.fromStringz;
+    }
 
-  /** Broker listening port */
-   int port() const
-   {
-    return broker_metadata_.port;
-   }
+    /** Broker listening port */
+    int port() const
+    {
+        return broker_metadata_.port;
+    }
 
- private:
-  const (rd_kafka_metadata_broker_t) *broker_metadata_;
+private:
+    const(rd_kafka_metadata_broker_t)* broker_metadata_;
 
 }
-
-
 
 /**
  * Metadata: Partition information
@@ -2539,87 +2560,93 @@ struct PartitionMetadata
 {
 nothrow @nogc:
 
-  /** Partition id */
-   int id() const
-   {
-    return partition_metadata_.id;
-   }
-
-  /** Partition error reported by broker */
-   ErrorCode err() const
-   {
-    return cast(ErrorCode)partition_metadata_.err;
-   }
-
-  /** Leader broker (id) for partition */
-   int leader() const
-   {
-    return partition_metadata_.leader;
-   }
-
-  /** Replica brokers */
-   auto replicas() const
-   {
-    static struct Replicas
+    /** Partition id */
+    int id() const
     {
-      nothrow @nogc:
-      private const (rd_kafka_metadata_partition_t) *partition_metadata_;
-      private size_t _i;
-      auto empty() @property
-      {
-        return _i >= partition_metadata_.replica_cnt;
-      }
-      auto front() @property
-      {
-        return partition_metadata_.replicas[_i];
-      }
-      auto popFront()
-      {
-        _i++;
-      }
-      auto length() @property
-      {
-        return partition_metadata_.replica_cnt - _i;
-      }
+        return partition_metadata_.id;
     }
-    return Replicas(partition_metadata_);
-   }
 
-  /** In-Sync-Replica brokers
+    /** Partition error reported by broker */
+    ErrorCode err() const
+    {
+        return cast(ErrorCode) partition_metadata_.err;
+    }
+
+    /** Leader broker (id) for partition */
+    int leader() const
+    {
+        return partition_metadata_.leader;
+    }
+
+    /** Replica brokers */
+    auto replicas() const
+    {
+        static struct Replicas
+        {
+        nothrow @nogc:
+            private const(rd_kafka_metadata_partition_t)* partition_metadata_;
+            private size_t _i;
+            auto empty() @property
+            {
+                return _i >= partition_metadata_.replica_cnt;
+            }
+
+            auto front() @property
+            {
+                return partition_metadata_.replicas[_i];
+            }
+
+            auto popFront()
+            {
+                _i++;
+            }
+
+            auto length() @property
+            {
+                return partition_metadata_.replica_cnt - _i;
+            }
+        }
+
+        return Replicas(partition_metadata_);
+    }
+
+    /** In-Sync-Replica brokers
    *  @warning The broker may return a cached/outdated list of ISRs.
    */
-   auto isrs() const
-   {
-    static struct Isrs
+    auto isrs() const
     {
-      nothrow @nogc:
-      private const (rd_kafka_metadata_partition_t) *partition_metadata_;
-      private size_t _i;
-      auto empty() @property
-      {
-        return _i >= partition_metadata_.isr_cnt;
-      }
-      auto front() @property
-      {
-        return partition_metadata_.isrs[_i];
-      }
-      auto popFront()
-      {
-        _i++;
-      }
-      auto length() @property
-      {
-        return partition_metadata_.isr_cnt - _i;
-      }
+        static struct Isrs
+        {
+        nothrow @nogc:
+            private const(rd_kafka_metadata_partition_t)* partition_metadata_;
+            private size_t _i;
+            auto empty() @property
+            {
+                return _i >= partition_metadata_.isr_cnt;
+            }
+
+            auto front() @property
+            {
+                return partition_metadata_.isrs[_i];
+            }
+
+            auto popFront()
+            {
+                _i++;
+            }
+
+            auto length() @property
+            {
+                return partition_metadata_.isr_cnt - _i;
+            }
+        }
+
+        return Isrs(partition_metadata_);
     }
-    return Isrs(partition_metadata_);
-   }
 
- private:
-  const rd_kafka_metadata_partition_t *partition_metadata_;
+private:
+    const rd_kafka_metadata_partition_t* partition_metadata_;
 }
-
-
 
 /**
  * Metadata: Topic information
@@ -2628,50 +2655,53 @@ struct TopicMetadata
 {
 nothrow @nogc:
 
-  /** Topic name */
-  const(char)[] topic() const
-  {
-    return topic_metadata_.topic.fromStringz;
-  }
-
-  /** Partition list */
-   auto partitions() const
-   {
-    static struct Partitions
+    /** Topic name */
+    const(char)[] topic() const
     {
-      nothrow @nogc:
-      private const (rd_kafka_metadata_topic_t) *topic_metadata_;
-      private size_t _i;
-      auto empty() @property
-      {
-        return _i >= topic_metadata_.partition_cnt;
-      }
-      auto front() @property
-      {
-        return PartitionMetadata(&topic_metadata_.partitions[_i]);
-      }
-      auto popFront()
-      {
-        _i++;
-      }
-      auto length() @property
-      {
-        return topic_metadata_.partition_cnt - _i;
-      }
+        return topic_metadata_.topic.fromStringz;
     }
-    return Partitions(topic_metadata_);
-   }
 
-  /** Topic error reported by broker */
-   ErrorCode err() const
-   {
-    return cast(ErrorCode)(topic_metadata_.err);
-   }
+    /** Partition list */
+    auto partitions() const
+    {
+        static struct Partitions
+        {
+        nothrow @nogc:
+            private const(rd_kafka_metadata_topic_t)* topic_metadata_;
+            private size_t _i;
+            auto empty() @property
+            {
+                return _i >= topic_metadata_.partition_cnt;
+            }
 
- private:
-  const (rd_kafka_metadata_topic_t) *topic_metadata_;
+            auto front() @property
+            {
+                return PartitionMetadata(&topic_metadata_.partitions[_i]);
+            }
+
+            auto popFront()
+            {
+                _i++;
+            }
+
+            auto length() @property
+            {
+                return topic_metadata_.partition_cnt - _i;
+            }
+        }
+
+        return Partitions(topic_metadata_);
+    }
+
+    /** Topic error reported by broker */
+    ErrorCode err() const
+    {
+        return cast(ErrorCode)(topic_metadata_.err);
+    }
+
+private:
+    const(rd_kafka_metadata_topic_t)* topic_metadata_;
 }
-
 
 /**
  * Metadata container
@@ -2680,76 +2710,82 @@ struct Metadata
 {
 nothrow @nogc:
 
-  /** Broker list */
-   auto brokers() const
-   {
-    static struct Brokers
+    /** Broker list */
+    auto brokers() const
     {
-      nothrow @nogc:
-      private const (rd_kafka_metadata_t) *metadata_;
-      private size_t _i;
-      auto empty() @property
-      {
-        return _i >= metadata_.broker_cnt;
-      }
-      auto front() @property
-      {
-        return BrokerMetadata(&metadata_.brokers[_i]);
-      }
-      auto popFront()
-      {
-        _i++;
-      }
-      auto length() @property
-      {
-        return metadata_.broker_cnt - _i;
-      }
-    }
-    return Brokers(metadata_);
-   }
+        static struct Brokers
+        {
+        nothrow @nogc:
+            private const(rd_kafka_metadata_t)* metadata_;
+            private size_t _i;
+            auto empty() @property
+            {
+                return _i >= metadata_.broker_cnt;
+            }
 
-  /** Topic list */
-   auto topics() const
-   {
-    static struct Topics
+            auto front() @property
+            {
+                return BrokerMetadata(&metadata_.brokers[_i]);
+            }
+
+            auto popFront()
+            {
+                _i++;
+            }
+
+            auto length() @property
+            {
+                return metadata_.broker_cnt - _i;
+            }
+        }
+
+        return Brokers(metadata_);
+    }
+
+    /** Topic list */
+    auto topics() const
     {
-      nothrow @nogc:
-      private const (rd_kafka_metadata_t) *metadata_;
-      private size_t _i;
-      auto empty() @property
-      {
-        return _i >= metadata_.topic_cnt;
-      }
-      auto front() @property
-      {
-        return TopicMetadata(&metadata_.topics[_i]);
-      }
-      auto popFront()
-      {
-        _i++;
-      }
-      auto length() @property
-      {
-        return metadata_.topic_cnt - _i;
-      }
+        static struct Topics
+        {
+        nothrow @nogc:
+            private const(rd_kafka_metadata_t)* metadata_;
+            private size_t _i;
+            auto empty() @property
+            {
+                return _i >= metadata_.topic_cnt;
+            }
+
+            auto front() @property
+            {
+                return TopicMetadata(&metadata_.topics[_i]);
+            }
+
+            auto popFront()
+            {
+                _i++;
+            }
+
+            auto length() @property
+            {
+                return metadata_.topic_cnt - _i;
+            }
+        }
+
+        return Topics(metadata_);
     }
-    return Topics(metadata_);
-   }
 
-
-  /** Broker (id) originating this metadata */
-   int origBrokerId() const
-   {
+    /** Broker (id) originating this metadata */
+    int origBrokerId() const
+    {
         return metadata_.orig_broker_id;
-   }
+    }
 
-  /** Broker (name) originating this metadata */
-   const(char)[] origBrokerName() const
-   {
-    return metadata_.orig_broker_name.fromStringz;
-   }
-
+    /** Broker (name) originating this metadata */
+    const(char)[] origBrokerName() const
+    {
+        return metadata_.orig_broker_name.fromStringz;
+    }
 
 private:
-  const (rd_kafka_metadata_t)* metadata_;
+    const(rd_kafka_metadata_t)* metadata_;
 }
