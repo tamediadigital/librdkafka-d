@@ -27,7 +27,6 @@
  */
 
 /**
- * @file rdkafkacpp.h
  * Apache Kafka C/C++ consumer and producer client library.
  *
  * rdkafkacpp.h contains the public C++ API for librdkafka.
@@ -38,9 +37,8 @@
  * The C++ interface is STD C++ '03 compliant and adheres to the
  * Google C++ Style Guide.
 
- * @sa For the C interface see rdkafka.h
+ * See_also: For the C interface see rdkafka.h
  *
- * @tableofcontents
  */
 module rdkafkad;
 
@@ -63,7 +61,7 @@ import deimos.rdkafka;
  *
  * E.g.: \c 0x000801ff.8.1
  *
- * @remark This value should only be used during compile time,
+ * Note: This value should only be used during compile time,
  *         for runtime checks of version use version()
  */
 enum RD_KAFKA_VERSION = 0x00090200;
@@ -71,7 +69,7 @@ enum RD_KAFKA_VERSION = 0x00090200;
 /**
  * Returns the librdkafka version as integer.
  *
- * @sa See RD_KAFKA_VERSION for how to parse the integer format.
+ * See_also: See RD_KAFKA_VERSION for how to parse the integer format.
  */
 int version_() nothrow @nogc
 {
@@ -118,7 +116,7 @@ int waitDestroyed(int timeout_ms) nothrow @nogc
  * delimited by a single underscore (\c ERR_..) denote broker
  * errors and are displayed as \c \"Broker: \<error string..\>\".
  *
- * @sa Use err2str() to translate an error code a human readable string
+ * See_also: Use err2str() to translate an error code a human readable string
  */
 enum ErrorCode
 {
@@ -268,7 +266,7 @@ enum ErrorCode
 }
 
 /**
- * @ Returns a human readable representation of a kafka error.
+ * Returns a human readable representation of a kafka error.
  */
 
 const(char)[] err2str(ErrorCode err) nothrow @nogc
@@ -298,7 +296,7 @@ alias DeliveryReportCb = void delegate(ref Message message) nothrow @nogc;
  *
  * Generic partitioner callback class for implementing custom partitioners.
  *
- * @sa Conf::set() \c "partitioner_cb"
+ * See_also: Conf::set() \c "partitioner_cb"
  */
 /**
    * Partitioner callback
@@ -308,12 +306,12 @@ alias DeliveryReportCb = void delegate(ref Message message) nothrow @nogc;
    * The \p msg_opaque is the same \p msg_opaque provided in the
    * Producer::produce() call.
    *
-   * @remark \p key may be null or the empty.
+   * Note: \p key may be null or the empty.
    *
    * Must return a value between 0 and \p partition_cnt (non-inclusive).
    *          May return RD_KAFKA_PARTITION_UA (-1) if partitioning failed.
    *
-   * @sa The callback may use Topic::partition_available() to check
+   * See_also: The callback may use Topic::partition_available() to check
    *     if a partition has an active leader broker.
    */
 alias PartitionerCb = int delegate(const Topic topic, const(char)[] key,
@@ -332,7 +330,7 @@ alias PartitionerKeyPointerCb = int delegate(const Topic topic, const(void)* key
  * Events are a generic interface for propagating errors, statistics, logs, etc
  * from librdkafka to the application.
  *
- * @sa Event
+ * See_also: Event
  */
 alias EventCb = void delegate(ref Event event) nothrow @nogc;
 
@@ -398,7 +396,7 @@ nothrow @nogc:
 
     /**
    * The event type
-   * @remark Applies to all event types
+   * Note: Applies to all event types
    */
     Type type() const
     {
@@ -407,7 +405,7 @@ nothrow @nogc:
 
     /**
    * Event error, if any.
-   * @remark Applies to all event types except THROTTLE
+   * Note: Applies to all event types except THROTTLE
    */
     ErrorCode err() const
     {
@@ -416,7 +414,7 @@ nothrow @nogc:
 
     /**
    * Log severity level.
-   * @remark Applies to LOG event type.
+   * Note: Applies to LOG event type.
    */
     Severity severity() const
     {
@@ -425,7 +423,7 @@ nothrow @nogc:
 
     /**
    * Log facility string.
-   * @remark Applies to LOG event type.
+   * Note: Applies to LOG event type.
    */
     const(char)[] fac() const
     {
@@ -438,7 +436,7 @@ nothrow @nogc:
    * \c LOG: Log message string.
    * \c STATS: JSON object (as string).
    *
-   * @remark Applies to LOG event type.
+   * Note: Applies to LOG event type.
    */
     const(char)[] str() const
     {
@@ -447,7 +445,7 @@ nothrow @nogc:
 
     /**
    * Throttle time in milliseconds.
-   * @remark Applies to THROTTLE event type.
+   * Note: Applies to THROTTLE event type.
    */
     int throttleTime() const
     {
@@ -456,7 +454,7 @@ nothrow @nogc:
 
     /**
    * Throttling broker's name.
-   * @remark Applies to THROTTLE event type.
+   * Note: Applies to THROTTLE event type.
    */
     const(char)[] brokerName() const
     {
@@ -468,7 +466,7 @@ nothrow @nogc:
 
     /**
    * Throttling broker's id.
-   * @remark Applies to THROTTLE event type.
+   * Note: Applies to THROTTLE event type.
    */
     int brokerId() const
     {
@@ -502,7 +500,7 @@ alias ConsumeCb = void delegate(ref Message message) nothrow @nogc;
 * assignment set based on the two events: ASSIGN_PARTITIONS
 * and REVOKE_PARTITIONS but should also be able to handle
 * arbitrary rebalancing failures where \p err is neither of those.
-* @remark In this latter case (arbitrary error), the application must
+* Note: In this latter case (arbitrary error), the application must
 *         call unassign() to synchronize state.
 
 *
@@ -596,7 +594,7 @@ alias SocketCb = int function(int domain, int type, int protocol) nothrow @nogc;
    *
    * It is typically not required to register an alternative open implementation
    *
-   * @remark Not currently available on native Win32
+   * Note: Not currently available on native Win32
    */
 alias OpenCb = int function(const(char)[] path, int flags, int mode) nothrow @nogc;
 
@@ -630,7 +628,7 @@ class ConfException : Exception
  * Consumer::create(), Producer::create(),
  * create(), etc.
  *
- * @sa CONFIGURATION.md for the full list of supported properties.
+ * See_also: CONFIGURATION.md for the full list of supported properties.
  */
 interface Conf
 {
@@ -766,7 +764,7 @@ nothrow @nogc:
      * Sets the default topic configuration to use for for automatically
      * subscribed topics.
      *
-     * @sa subscribe()
+     * See_also: subscribe()
      */
     void defaultTopicConf(in char[] name, const TopicConf topic_conf)
     {
@@ -868,7 +866,7 @@ class Handle
     /**
     * Returns the client's broker-assigned group member id
     *
-    * @remark This currently requires the high-level KafkaConsumer
+    * Note: This currently requires the high-level KafkaConsumer
     *
     * Last assigned member id, or empty string if not currently
     *          a group member.
@@ -974,7 +972,7 @@ nothrow @nogc:
     *   - delivery report callbacks (if an DeliveryCb is configured) [producer]
     *   - event callbacks (if an EventCb is configured) [producer & consumer]
     *
-    * @remark  An application should make sure to call poll() at regular
+    * Note:  An application should make sure to call poll() at regular
     *          intervals to serve any queued callbacks waiting to be called.
     *
     * @warning This method MUST NOT be used with the KafkaConsumer,
@@ -1194,7 +1192,7 @@ nothrow @nogc:
     *
     * ErrorCode::NO_ERROR
     *
-    * @sa resume()
+    * See_also: resume()
     */
     nothrow ErrorCode pause(TopicPartition[] partitions)
     {
@@ -1221,7 +1219,7 @@ nothrow @nogc:
     *
     * ErrorCode::NO_ERROR
     *
-    * @sa pause()
+    * See_also: pause()
     */
     nothrow ErrorCode resume(TopicPartition[] partitions)
     {
@@ -1255,7 +1253,7 @@ nothrow @nogc:
    *
    * ERR_NO_ERROR on success or an error code on failure.
    *
-   * @remark Shall only be used with an active consumer instance.
+   * Note: Shall only be used with an active consumer instance.
    */
     ErrorCode getWatermarkOffsets(const(char)* topic, int partition, ref long low,
         ref long high)
@@ -1474,9 +1472,9 @@ nothrow @nogc:
    * The offset will be committed (written) to the offset store according
    * to \p auto.commit.interval.ms.
    *
-   * @remark This API should only be used with the simple Consumer,
+   * Note: This API should only be used with the simple Consumer,
    *         not the high-level KafkaConsumer.
-   * @remark \c auto.commit.enable must be set to \c false when using this API.
+   * Note: \c auto.commit.enable must be set to \c false when using this API.
    *
    * ERR_NO_ERROR on success or an error code on error.
    */
@@ -1493,7 +1491,7 @@ nothrow @nogc:
  *
  * The Type dictates the timestamp type or origin.
  *
- * @remark Requires Apache Kafka broker version >= 0.10.0
+ * Note: Requires Apache Kafka broker version >= 0.10.0
  *
  */
 
@@ -1691,7 +1689,7 @@ private:
 /**
  * High-level KafkaConsumer (for brokers 0.9 and later)
  *
- * @remark Requires Apache Kafka >= 0.9.0 brokers
+ * Note: Requires Apache Kafka >= 0.9.0 brokers
  *
  * Currently supports the \c range and \c roundrobin partition assignment
  * strategies (see \c partition.assignment.strategy)
@@ -1705,8 +1703,8 @@ class KafkaConsumer : Handle
    *
    * Use close() to shut down the consumer.
    *
-   * @sa RebalanceCb
-   * @sa CONFIGURATION.md for \c group.id, \c session.timeout.ms,
+   * See_also: RebalanceCb
+   * See_also: CONFIGURATION.md for \c group.id, \c session.timeout.ms,
    *     \c partition.assignment.strategy, etc.
    */
     this(GlobalConf conf)
@@ -1837,16 +1835,16 @@ nothrow @nogc:
    * including RebalanceCb, EventCb, OffsetCommitCb,
    * etc.
    *
-   * @remark Use \c delete to free the message.
+   * Note: Use \c delete to free the message.
    *
-   * @remark  An application should make sure to call consume() at regular
+   * Note:  An application should make sure to call consume() at regular
    *          intervals, even if no messages are expected, to serve any
    *          queued callbacks waiting to be called. This is especially
    *          important when a RebalanceCb has been registered as it needs
    *          to be called and handled properly to synchronize internal
    *          consumer state.
    *
-   * @remark Application MUST NOT call \p poll() on KafkaConsumer objects.
+   * Note: Application MUST NOT call \p poll() on KafkaConsumer objects.
    *
    * One of:
    *  - proper message (Message::err() is ERR_NO_ERROR)
@@ -1897,13 +1895,12 @@ nothrow @nogc:
     /**
    * Commit offsets for the current assignment.
    *
-   * @remark This is the synchronous variant that blocks until offsets
+   * Note: This is the synchronous variant that blocks until offsets
    *         are committed or the commit fails (see return value).
    *
-   * @remark If a OffsetCommitCb callback is registered it will
+   * Note: If a OffsetCommitCb callback is registered it will
    *         be called with commit details on a future call to
    *         consume()
-
    *
    * ERR_NO_ERROR or error code.
    */
@@ -1916,7 +1913,7 @@ nothrow @nogc:
     /**
    * Asynchronous version of CommitSync()
    *
-   * @sa KafkaConsummer::commitSync()
+   * See_also: KafkaConsummer::commitSync()
    */
     nothrow @nogc ErrorCode commitAsync()
     {
@@ -1926,9 +1923,9 @@ nothrow @nogc:
     /**
    * Commit offset for a single topic+partition based on \p message
    *
-   * @remark This is the synchronous variant.
+   * Note: This is the synchronous variant.
    *
-   * @sa KafkaConsummer::commitSync()
+   * See_also: KafkaConsummer::commitSync()
    */
     nothrow @nogc ErrorCode commitSync(ref Message message)
     {
@@ -1938,9 +1935,9 @@ nothrow @nogc:
     /**
    * Commit offset for a single topic+partition based on \p message
    *
-   * @remark This is the asynchronous variant.
+   * Note: This is the asynchronous variant.
    *
-   * @sa KafkaConsummer::commitSync()
+   * See_also: KafkaConsummer::commitSync()
    */
     nothrow @nogc ErrorCode commitAsync(ref Message message)
     {
@@ -1950,7 +1947,7 @@ nothrow @nogc:
     /**
    * Commit offsets for the provided list of partitions.
    *
-   * @remark This is the synchronous variant.
+   * Note: This is the synchronous variant.
    */
     ErrorCode commitSync(TopicPartition[] offsets)
     {
@@ -1965,7 +1962,7 @@ nothrow @nogc:
     /**
    * Commit offset for the provided list of partitions.
    *
-   * @remark This is the asynchronous variant.
+   * Note: This is the asynchronous variant.
    */
     ErrorCode commitAsync(const TopicPartition[] offsets)
     {
@@ -2041,10 +2038,10 @@ nothrow @nogc:
    *
    * The maximum blocking time is roughly limited to session.timeout.ms.
    *
-   * @remark Callbacks, such as RebalanceCb and
+   * Note: Callbacks, such as RebalanceCb and
    *         OffsetCommitCb, etc, may be called.
    *
-   * @remark The consumer object must later be freed with \c delete
+   * Note: The consumer object must later be freed with \c delete
    */
     ErrorCode close()
     {
@@ -2277,7 +2274,7 @@ static:
    *
    * the number of messages processed or -1 on error.
    *
-   * @sa Consumer::consume()
+   * See_also: Consumer::consume()
    */
     int consumeCallback(Topic topic, int partition, int timeout_ms, ConsumeCb consume_cb)
     {
@@ -2316,7 +2313,7 @@ static:
    * Consumes messages from \p queue, calling the provided callback for
    *        each consumed messsage.
    *
-   * @sa Consumer::consumeCallback()
+   * See_also: Consumer::consumeCallback()
    */
 
     int consumeCallback(Queue queue, int timeout_ms, ConsumeCb consume_cb)
@@ -2333,7 +2330,7 @@ static:
    *
    * the logical offset for message \p offset from the tail, this value
    *          may be passed to Consumer::start, et.al.
-   * @remark The returned logical offset is specific to librdkafka.
+   * Note: The returned logical offset is specific to librdkafka.
    */
     long offsetTail(long offset)
     {
@@ -2512,7 +2509,7 @@ nothrow @nogc:
    *        to make sure all queued and in-flight produce requests are completed
    *        before terminating.
    *
-   * @remark This function will call poll() and thus trigger callbacks.
+   * Note: This function will call poll() and thus trigger callbacks.
    *
    * TIMED_OUT if \p timeout_ms was reached before all
    *          outstanding requests were completed, else ERR_NO_ERROR
