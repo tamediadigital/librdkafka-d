@@ -1274,6 +1274,10 @@ nothrow @nogc:
  */
 struct TopicPartition
 {
+    private const(char)* topic_;
+    private int partition_;
+    private long offset_;
+    private ErrorCode err_;
 
     void toString(in void delegate(const(char)[]) sink) const
     {
@@ -1315,44 +1319,33 @@ nothrow @nogc:
         // FIXME: metadata
     }
 
-    private const(char)* topic_;
-    private int partition_;
-    private long offset_;
-    private ErrorCode err_;
-
     /** partition id */
-    int partition()
+    int partition() @property
     {
         return partition_;
     }
     /** topic name */
-    const(char)[] topic() const
+    const(char)[] topic() const @property
     {
         return topic_.fromStringz;
     }
 
     /** offset (if applicable) */
-    long offset()
+    long offset() @property
     {
         return offset_;
     }
 
     /** Set offset */
-    void offset(long offset)
+    void offset(long offset) @property
     {
         offset_ = offset;
     }
 
     /** error code (if applicable) */
-    ErrorCode err()
+    ErrorCode err() @property
     {
         return err_;
-    }
-
-    /** Set offset */
-    void offset(long offset)
-    {
-        offset_ = offset;
     }
 }
 
@@ -1812,8 +1805,8 @@ nothrow @nogc:
 
         c_topics = rd_kafka_topic_partition_list_new(cast(int) topics.length);
 
-        for (uint i = 0; i < topics.length; i++)
-            rd_kafka_topic_partition_list_add(c_topics, topics[i], RD_KAFKA_PARTITION_UA);
+        foreach (t; topics)
+            rd_kafka_topic_partition_list_add(c_topics, t, RD_KAFKA_PARTITION_UA);
 
         err = rd_kafka_subscribe(rk_, c_topics);
 
@@ -2493,7 +2486,7 @@ nothrow @nogc:
    *        instead of as a const(char)[] *.
    */
     ErrorCode produce(Topic topic, int partition, int msgflags, void[] payload,
-        const(char[]) key, void* msg_opaque)
+        const(char)[] key, void* msg_opaque)
     {
         if (rd_kafka_produce(topic.rkt_, partition, msgflags, payload.ptr,
                 payload.length, key.ptr, key.length, msg_opaque) == -1)
@@ -2525,7 +2518,9 @@ nothrow @nogc:
  */
 struct BrokerMetadata
 {
-nothrow @nogc:
+    private const(rd_kafka_metadata_broker_t)* broker_metadata_;
+
+const @property nothrow @nogc:
 
     /** Broker id */
     int id() const
@@ -2544,10 +2539,6 @@ nothrow @nogc:
     {
         return broker_metadata_.port;
     }
-
-private:
-    const(rd_kafka_metadata_broker_t)* broker_metadata_;
-
 }
 
 /**
@@ -2555,28 +2546,30 @@ private:
  */
 struct PartitionMetadata
 {
-nothrow @nogc:
+    private const (rd_kafka_metadata_partition_t)* partition_metadata_;
+
+const @property nothrow @nogc:
 
     /** Partition id */
-    int id() const
+    int id()
     {
         return partition_metadata_.id;
     }
 
     /** Partition error reported by broker */
-    ErrorCode err() const
+    ErrorCode err()
     {
         return cast(ErrorCode) partition_metadata_.err;
     }
 
     /** Leader broker (id) for partition */
-    int leader() const
+    int leader()
     {
         return partition_metadata_.leader;
     }
 
     /** Replica brokers */
-    auto replicas() const
+    auto replicas()
     {
         static struct Replicas
         {
@@ -2610,7 +2603,7 @@ nothrow @nogc:
     /** In-Sync-Replica brokers
    *  @warning The broker may return a cached/outdated list of ISRs.
    */
-    auto isrs() const
+    auto isrs()
     {
         static struct Isrs
         {
@@ -2640,9 +2633,6 @@ nothrow @nogc:
 
         return Isrs(partition_metadata_);
     }
-
-private:
-    const rd_kafka_metadata_partition_t* partition_metadata_;
 }
 
 /**
@@ -2650,16 +2640,18 @@ private:
  */
 struct TopicMetadata
 {
-nothrow @nogc:
+    private const(rd_kafka_metadata_topic_t)* topic_metadata_;
+
+const @property nothrow @nogc:
 
     /** Topic name */
-    const(char)[] topic() const
+    const(char)[] topic()
     {
         return topic_metadata_.topic.fromStringz;
     }
 
     /** Partition list */
-    auto partitions() const
+    auto partitions()
     {
         static struct Partitions
         {
@@ -2691,13 +2683,10 @@ nothrow @nogc:
     }
 
     /** Topic error reported by broker */
-    ErrorCode err() const
+    ErrorCode err()
     {
         return cast(ErrorCode)(topic_metadata_.err);
     }
-
-private:
-    const(rd_kafka_metadata_topic_t)* topic_metadata_;
 }
 
 /**
@@ -2705,10 +2694,12 @@ private:
  */
 struct Metadata
 {
-nothrow @nogc:
+    private const(rd_kafka_metadata_t)* metadata_;
+
+const @property nothrow @nogc:
 
     /** Broker list */
-    auto brokers() const
+    auto brokers() 
     {
         static struct Brokers
         {
@@ -2740,7 +2731,7 @@ nothrow @nogc:
     }
 
     /** Topic list */
-    auto topics() const
+    auto topics()
     {
         static struct Topics
         {
@@ -2772,17 +2763,14 @@ nothrow @nogc:
     }
 
     /** Broker (id) originating this metadata */
-    int origBrokerId() const
+    int origBrokerId()
     {
         return metadata_.orig_broker_id;
     }
 
     /** Broker (name) originating this metadata */
-    const(char)[] origBrokerName() const
+    const(char)[] origBrokerName()
     {
         return metadata_.orig_broker_name.fromStringz;
     }
-
-private:
-    const(rd_kafka_metadata_t)* metadata_;
 }
