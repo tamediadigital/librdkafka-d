@@ -2340,7 +2340,7 @@ nothrow @nogc:
    *
    * These flags are optional and mutually exclusive.
    */
-   enum Msg
+   enum MsgOpt
    {
         FREE = 0x1, /**< rdkafka will free(3) \p payload
                                             * when it is done with it. */
@@ -2419,7 +2419,7 @@ nothrow @nogc:
    *  - _UNKNOWN_TOPIC     - topic is unknown in the Kafka cluster.
    */
     ErrorCode produce(Topic topic, int partition, void[] payload,
-        const(void)[] key = null, int msgflags = Msg.COPY, void* msg_opaque = null)
+        const(void)[] key = null, int msgflags = MsgOpt.COPY, void* msg_opaque = null)
     {
         if (rd_kafka_produce(topic.rkt_, partition, msgflags, payload.ptr,
                 payload.length, key.ptr, key.length, msg_opaque) == -1)
