@@ -36,8 +36,8 @@ nothrow @nogc:
     {
         topic_ = topic;
         partition_ = partition;
-        offset_ = Topic.OFFSET_INVALID;
-        err_ = ErrorCode.NO_ERROR;
+        offset_ = Offset.invalid;
+        err_ = ErrorCode.no_error;
     }
 
     /// ditto
@@ -45,8 +45,8 @@ nothrow @nogc:
     {
         topic_ = topic;
         partition_ = partition;
-        offset_ = Topic.OFFSET_INVALID;
-        err_ = ErrorCode.NO_ERROR;
+        offset_ = Offset.invalid;
+        err_ = ErrorCode.no_error;
     }
 
     package this(const rd_kafka_topic_partition_t* c_part)
@@ -86,6 +86,15 @@ nothrow @nogc:
     {
         return err_;
     }
+}
+
+/** Special offsets */
+enum Offset
+{
+    beginning = -2, /**< Consume from beginning */
+    end = -1, /**< Consume from end */
+    stored = -1000, /**< Use offset storage */
+    invalid = -1001, /**< Invalid offset */
 }
 
 /**
@@ -134,9 +143,9 @@ class Topic
         rkt_ = rd_kafka_topic_new(base.rk_, topic_str.toStringz(), rkt_conf);
         if (!rkt_)
         {
-            auto errstr = rd_kafka_err2str(rd_kafka_errno2err(errno));
+            auto msg = err2str(cast(ErrorCode)rd_kafka_errno2err(errno));
             rd_kafka_topic_conf_destroy(rkt_conf);
-            throw new Exception(cast(string) errstr.fromStringz);
+            throw new Exception(msg);
         }
     }
 
@@ -158,13 +167,7 @@ nothrow @nogc:
    * The unassigned partition is used by the producer API for messages
    * that should be partitioned using the configured or default partitioner.
    */
-    enum int PARTITION_UA = -1;
-
-    /** Special offsets */
-    enum long OFFSET_BEGINNING = -2; /**< Consume from beginning */
-    enum long OFFSET_END = -1; /**< Consume from end */
-    enum long OFFSET_STORED = -1000; /**< Use offset storage */
-    enum long OFFSET_INVALID = -1001; /**< Invalid offset */
+    enum int unassignedPartittin = -1;
 
     package static nothrow @nogc int partitioner_cb_trampoline(
         const rd_kafka_topic_t* rkt, const(void)* keydata, size_t keylen,
@@ -208,7 +211,7 @@ nothrow @nogc:
    *         not the high-level KafkaConsumer.
    * Note: \c auto.commit.enable must be set to \c false when using this API.
    *
-   * ERR_NO_ERROR on success or an error code on error.
+   * ErrorCodde.no_error on success or an error code on error.
    */
     final ErrorCode offsetStore(int partition, long offset)
     {

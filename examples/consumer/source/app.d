@@ -26,7 +26,7 @@ void main()
         if(++c % 100 == 0) // use large number for fast I/O!
             consumer.commitSync();
         Message msg;
-        consumer.consume(6000, msg);
+        consumer.consume(msg, 6000);
         if(auto error = msg.err)
         {
             writeln("Error: ", error.err2str);
