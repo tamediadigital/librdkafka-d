@@ -689,7 +689,7 @@ nothrow @nogc:
 
 package:
     Topic topic_;
-    const rd_kafka_message_t* rkmessage_;
+    const (rd_kafka_message_t)* rkmessage_;
     bool free_rkmessage_;
     /* For error signalling by the C++ layer the .._err_ message is
    * used as a place holder and rkmessage_ is set to point to it. */
