@@ -167,7 +167,7 @@ nothrow @nogc:
    * The unassigned partition is used by the producer API for messages
    * that should be partitioned using the configured or default partitioner.
    */
-    enum int unassignedPartittin = -1;
+    enum int unassignedPartition = -1;
 
     package static nothrow @nogc int partitioner_cb_trampoline(
         const rd_kafka_topic_t* rkt, const(void)* keydata, size_t keylen,

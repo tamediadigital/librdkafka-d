@@ -36,7 +36,7 @@ shared static this()
     runWorkerTask({ while(continuePoll) producer.poll(10);});
     producerTask = runTask({for (;;){
         receive((string msg) {
-            if(auto error = producer.produce(topic, Topic.unassignedPartittin, cast(void[])msg))
+            if(auto error = producer.produce(topic, Topic.unassignedPartition, cast(void[])msg))
             {
                 if(error == ErrorCode.queue_full)
                 {

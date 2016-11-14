@@ -36,7 +36,7 @@ void main()
         import std.format;
         string key = "myKey";
         string payload = format("myValue %d", c++); // use large payload for I/O benchmarks
-        if(auto error = producer.produce(topic, Topic.unassignedPartittin, cast(void[])payload, cast(const(void)[])key))
+        if(auto error = producer.produce(topic, Topic.unassignedPartition, cast(void[])payload, cast(const(void)[])key))
         {
             if(error == ErrorCode.queue_full)
             {
