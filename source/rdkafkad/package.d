@@ -127,156 +127,156 @@ enum ErrorCode
 {
     /* Internal errors to rdkafka: */
     /** Begin internal error codes */
-    _BEGIN = -200,
+    begin = -200,
     /** Received message is incorrect */
-    _BAD_MSG = -199,
+    bad_msg = -199,
     /** Bad/unknown compression */
-    _BAD_COMPRESSION = -198,
+    bad_compression = -198,
     /** Broker is going away */
-    _DESTROY = -197,
+    destroy = -197,
     /** Generic failure */
-    _FAIL = -196,
+    fail = -196,
     /** Broker transport failure */
-    _TRANSPORT = -195,
+    transport = -195,
     /** Critical system resource */
-    _CRIT_SYS_RESOURCE = -194,
+    crit_sys_resource = -194,
     /** Failed to resolve broker */
-    _RESOLVE = -193,
+    resolve = -193,
     /** Produced message timed out*/
-    _MSG_TIMED_OUT = -192,
+    msg_timed_out = -192,
     /** Reached the end of the topic+partition queue on
    * the broker. Not really an error. */
-    _PARTITION_EOF = -191,
+    partition_eof = -191,
     /** Permanent: Partition does not exist in cluster. */
-    _UNKNOWN_PARTITION = -190,
+    unknown_partition = -190,
     /** File or filesystem error */
-    _FS = -189,
+    fs = -189,
     /** Permanent: Topic does not exist in cluster. */
-    _UNKNOWN_TOPIC = -188,
+    unknown_topic = -188,
     /** All broker connections are down. */
-    _ALL_BROKERS_DOWN = -187,
+    all_brokers_down = -187,
     /** Invalid argument, or invalid configuration */
-    _INVALID_ARG = -186,
+    invalid_arg = -186,
     /** Operation timed out */
-    _TIMED_OUT = -185,
+    timed_out = -185,
     /** Queue is full */
-    _QUEUE_FULL = -184,
+    queue_full = -184,
     /** ISR count < required.acks */
-    _ISR_INSUFF = -183,
+    isr_insuff = -183,
     /** Broker node update */
-    _NODE_UPDATE = -182,
+    node_update = -182,
     /** SSL error */
-    _SSL = -181,
+    ssl = -181,
     /** Waiting for coordinator to become available. */
-    _WAIT_COORD = -180,
+    wait_coord = -180,
     /** Unknown client group */
-    _UNKNOWN_GROUP = -179,
+    unknown_group = -179,
     /** Operation in progress */
-    _IN_PROGRESS = -178,
+    in_progress = -178,
     /** Previous operation in progress, wait for it to finish. */
-    _PREV_IN_PROGRESS = -177,
+    prev_in_progress = -177,
     /** This operation would interfere with an existing subscription */
-    _EXISTING_SUBSCRIPTION = -176,
+    existing_subscription = -176,
     /** Assigned partitions (rebalance_cb) */
-    _ASSIGN_PARTITIONS = -175,
+    assign_partitions = -175,
     /** Revoked partitions (rebalance_cb) */
-    _REVOKE_PARTITIONS = -174,
+    revoke_partitions = -174,
     /** Conflicting use */
-    _CONFLICT = -173,
+    conflict = -173,
     /** Wrong state */
-    _STATE = -172,
+    state = -172,
     /** Unknown protocol */
-    _UNKNOWN_PROTOCOL = -171,
+    unknown_protocol = -171,
     /** Not implemented */
-    _NOT_IMPLEMENTED = -170,
+    not_implemented = -170,
     /** Authentication failure*/
-    _AUTHENTICATION = -169,
+    authentication = -169,
     /** No stored offset */
-    _NO_OFFSET = -168,
+    no_offset = -168,
     /** Outdated */
-    _OUTDATED = -167,
+    outdated = -167,
     /** Timed out in queue */
-    _TIMED_OUT_QUEUE = -166,
+    timed_out_queue = -166,
 
     /** End internal error codes */
-    _END = -100,
+    end = -100,
 
     /* Kafka broker errors: */
     /** Unknown broker error */
-    UNKNOWN = -1,
+    unknown = -1,
     /** Success */
-    NO_ERROR,
+    no_error,
     /** Offset out of range */
-    OFFSET_OUT_OF_RANGE = 1,
+    offset_out_of_range = 1,
     /** Invalid message */
-    INVALID_MSG = 2,
+    invalid_msg = 2,
     /** Unknown topic or partition */
-    UNKNOWN_TOPIC_OR_PART = 3,
+    unknown_topic_or_part = 3,
     /** Invalid message size */
-    INVALID_MSG_SIZE = 4,
+    invalid_msg_size = 4,
     /** Leader not available */
-    LEADER_NOT_AVAILABLE = 5,
+    leader_not_available = 5,
     /** Not leader for partition */
-    NOT_LEADER_FOR_PARTITION = 6,
+    not_leader_for_partition = 6,
     /** Request timed out */
-    REQUEST_TIMED_OUT = 7,
+    request_timed_out = 7,
     /** Broker not available */
-    BROKER_NOT_AVAILABLE = 8,
+    broker_not_available = 8,
     /** Replica not available */
-    REPLICA_NOT_AVAILABLE = 9,
+    replica_not_available = 9,
     /** Message size too large */
-    MSG_SIZE_TOO_LARGE = 10,
+    msg_size_too_large = 10,
     /** StaleControllerEpochCode */
-    STALE_CTRL_EPOCH = 11,
+    stale_ctrl_epoch = 11,
     /** Offset metadata string too large */
-    OFFSET_METADATA_TOO_LARGE = 12,
+    offset_metadata_too_large = 12,
     /** Broker disconnected before response received */
-    NETWORK_EXCEPTION = 13,
+    network_exception = 13,
     /** Group coordinator load in progress */
-    GROUP_LOAD_IN_PROGRESS = 14,
+    group_load_in_progress = 14,
     /** Group coordinator not available */
-    GROUP_COORDINATOR_NOT_AVAILABLE = 15,
+    group_coordinator_not_available = 15,
     /** Not coordinator for group */
-    NOT_COORDINATOR_FOR_GROUP = 16,
+    not_coordinator_for_group = 16,
     /** Invalid topic */
-    TOPIC_EXCEPTION = 17,
+    topic_exception = 17,
     /** Message batch larger than configured server segment size */
-    RECORD_LIST_TOO_LARGE = 18,
+    record_list_too_large = 18,
     /** Not enough in-sync replicas */
-    NOT_ENOUGH_REPLICAS = 19,
+    not_enough_replicas = 19,
     /** Message(s) written to insufficient number of in-sync replicas */
-    NOT_ENOUGH_REPLICAS_AFTER_APPEND = 20,
+    not_enough_replicas_after_append = 20,
     /** Invalid required acks value */
-    INVALID_REQUIRED_ACKS = 21,
+    invalid_required_acks = 21,
     /** Specified group generation id is not valid */
-    ILLEGAL_GENERATION = 22,
+    illegal_generation = 22,
     /** Inconsistent group protocol */
-    INCONSISTENT_GROUP_PROTOCOL = 23,
+    inconsistent_group_protocol = 23,
     /** Invalid group.id */
-    INVALID_GROUP_ID = 24,
+    invalid_group_id = 24,
     /** Unknown member */
-    UNKNOWN_MEMBER_ID = 25,
+    unknown_member_id = 25,
     /** Invalid session timeout */
-    INVALID_SESSION_TIMEOUT = 26,
+    invalid_session_timeout = 26,
     /** Group rebalance in progress */
-    REBALANCE_IN_PROGRESS = 27,
+    rebalance_in_progress = 27,
     /** Commit offset data size is not valid */
-    INVALID_COMMIT_OFFSET_SIZE = 28,
+    invalid_commit_offset_size = 28,
     /** Topic authorization failed */
-    TOPIC_AUTHORIZATION_FAILED = 29,
+    topic_authorization_failed = 29,
     /** Group authorization failed */
-    GROUP_AUTHORIZATION_FAILED = 30,
+    group_authorization_failed = 30,
     /** Cluster authorization failed */
-    CLUSTER_AUTHORIZATION_FAILED = 31
+    cluster_authorization_failed = 31
 }
 
 /**
  * Returns a human readable representation of a kafka error.
  */
 
-const(char)[] err2str(ErrorCode err) nothrow @nogc
+string err2str(ErrorCode err) nothrow @nogc
 {
-    return rd_kafka_err2str(cast(rd_kafka_resp_err_t) err).fromStringz;
+    return cast(string)rd_kafka_err2str(cast(rd_kafka_resp_err_t) err).fromStringz;
 }
 
 /**
@@ -348,23 +348,23 @@ nothrow @nogc:
     /** Event type */
     enum Type
     {
-        ERROR, /**< Event is an error condition */
-        STATS, /**< Event is a statistics JSON document */
-        LOG, /**< Event is a log message */
-        THROTTLE /**< Event is a throttle level signaling from the broker */
+        error, /**< Event is an error condition */
+        stats, /**< Event is a statistics JSON document */
+        log, /**< Event is a log message */
+        throttle /**< Event is a throttle level signaling from the broker */
     }
 
     /** LOG severities (conforms to syslog(3) severities) */
     enum Severity
     {
-        EMERG,
-        ALERT = 1,
-        CRITICAL = 2,
-        ERROR = 3,
-        WARNING = 4,
-        NOTICE = 5,
-        INFO = 6,
-        DEBUG = 7
+        emerg,
+        alert = 1,
+        critical = 2,
+        error = 3,
+        warning = 4,
+        notice = 5,
+        info = 6,
+        debug_ = 7
     }
 
     package this(Type type, ErrorCode err, Severity severity, const char* fac, const char* str)
@@ -379,8 +379,8 @@ nothrow @nogc:
     package this(Type type)
     {
         type_ = type;
-        err_ = ErrorCode.NO_ERROR;
-        severity_ = Severity.EMERG;
+        err_ = ErrorCode.no_error;
+        severity_ = Severity.emerg;
         fac_ = "";
         str_ = "";
     }
@@ -389,7 +389,7 @@ nothrow @nogc:
     package ErrorCode err_;
     package Severity severity_;
     package const(char)[] fac_;
-    package const(char)[] str_; /* reused for THROTTLE broker_name */
+    package const(char)[] str_; /* reused for throttle broker_name */
     package int id_;
     package int throttle_time_;
 
@@ -410,7 +410,7 @@ nothrow @nogc:
 
     /**
    * Event error, if any.
-   * Note: Applies to all event types except THROTTLE
+   * Note: Applies to all event types except throttle
    */
     ErrorCode err() const
     {
@@ -449,8 +449,8 @@ nothrow @nogc:
     }
 
     /**
-   * Throttle time in milliseconds.
-   * Note: Applies to THROTTLE event type.
+   * throttle time in milliseconds.
+   * Note: Applies to throttle event type.
    */
     int throttleTime() const
     {
@@ -459,11 +459,11 @@ nothrow @nogc:
 
     /**
    * Throttling broker's name.
-   * Note: Applies to THROTTLE event type.
+   * Note: Applies to throttle event type.
    */
     const(char)[] brokerName() const
     {
-        if (type_ == Type.THROTTLE)
+        if (type_ == Type.throttle)
             return str_;
         else
             return "";
@@ -471,7 +471,7 @@ nothrow @nogc:
 
     /**
    * Throttling broker's id.
-   * Note: Applies to THROTTLE event type.
+   * Note: Applies to throttle event type.
    */
     int brokerId() const
     {
@@ -558,6 +558,7 @@ alias OffsetCommitCb = void delegate(ErrorCode err, ref TopicPartition[] offsets
 */
 alias SocketCb = int function(int domain, int type, int protocol) nothrow @nogc;
 
+
 /**
  * Message object
  *
@@ -565,12 +566,36 @@ alias SocketCb = int function(int domain, int type, int protocol) nothrow @nogc;
  * or an event (\p err() is set).
  *
  * An application must check Message::err() to see if the
- * object is a proper message (error is ERR_NO_ERROR) or a
+ * object is a proper message (error is ErrorCode.no_error) or a
  * an error event.
  *
  */
 struct Message
 {
+    /**
+     * Message timestamp object
+     *
+     * Represents the number of milliseconds since the epoch (UTC).
+     *
+     * The Type dictates the timestamp type or origin.
+     *
+     * Note: Requires Apache Kafka broker version >= 0.10.0
+     *
+     */
+    struct Timestamp
+    {
+        enum Type
+        {
+            not_available, /**< Timestamp not available */
+            create_time, /**< Message creation time (source) */
+            log_append_time /**< Message log append time (broker) */
+        }
+
+        long timestamp; /**< Milliseconds since epoch (UTC). */
+        Type type; /**< Timestamp type */
+    }
+
+
     @disable this(this);
 nothrow @nogc:
      ~this()
@@ -616,14 +641,14 @@ nothrow @nogc:
 
     /** The error string if object represent an error event,
    *           else an empty string. */
-    const(char)[] errstr() const
+    string errstr() const
     {
         /* FIXME: If there is an error string in payload (for consume_cb)
      *        it wont be shown since 'payload' is reused for errstr
      *        and we cant distinguish between consumer and producer.
      *        For the producer case the payload needs to be the original
      *        payload pointer. */
-        return rd_kafka_err2str(rkmessage_.err).fromStringz;
+        return err2str(cast(ErrorCode)rkmessage_.err);
     }
 
     /** The error code if object represents an error event, else 0. */
@@ -672,12 +697,12 @@ nothrow @nogc:
     }
 
     /** Message timestamp (if applicable) */
-    MessageTimestamp timestamp() const
+    Timestamp timestamp() const
     {
-        MessageTimestamp ts;
+        Timestamp ts;
         rd_kafka_timestamp_type_t tstype;
         ts.timestamp = rd_kafka_message_timestamp(rkmessage_, &tstype);
-        ts.type = cast(MessageTimestamp.Type) tstype;
+        ts.type = cast(Timestamp.Type) tstype;
         return ts;
     }
 

@@ -12,7 +12,6 @@ void main()
     /// @@@@@ Configuration
     // pointer to the conf should be preserved for because delegates are used (for closures).
 	auto conf = new GlobalConf;
-    auto topicConf = new TopicConf;
     Producer producer;
     try
     {
@@ -26,7 +25,7 @@ void main()
         return;
     }
     auto topics = [
-        new Topic(producer, "test_topic", topicConf),
+        producer.newTopic("httplog_topic"),
     ];
     /// @@@@@ Main loop :-)
     auto handler = new Thread({ while(continuePoll) producer.poll(10);}).start;
@@ -35,9 +34,9 @@ void main()
         import std.format;
         string key = "myKey";
         string payload = format("myValue %d", c++); // use large payload for I/O benchmarks
-        if(auto error = producer.produce(topic, Topic.PARTITION_UA, cast(void[])payload, cast(const(void)[])key))
+        if(auto error = producer.produce(topic, Topic.unassignedPartition, cast(void[])payload, cast(const(void)[])key))
         {
-            if(error == ErrorCode._QUEUE_FULL)
+            if(error == ErrorCode.queue_full)
             {
                 writeln(error.err2str);
                 Thread.sleep(10.msecs);

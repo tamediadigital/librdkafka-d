@@ -6,7 +6,6 @@ void main()
     /// @@@@@ Configuration
     // pointer to the conf should be preserved for because delegates are used (for closures).
 	auto conf = new GlobalConf;
-    auto topicConf = new TopicConf;
     KafkaConsumer consumer;
     try
     {
@@ -19,14 +18,13 @@ void main()
         stderr.writeln(e.msg);
         return;
     }
-    conf.defaultTopicConf = topicConf;
     consumer.subscribe("httplog_topic", /+...+/);
     for (size_t c;;)
     {
         if(++c % 100 == 0) // use large number for fast I/O!
             consumer.commitSync();
         Message msg;
-        consumer.consume(6000, msg);
+        consumer.consume(msg, 6000);
         if(auto error = msg.err)
         {
             writeln("Error: ", error.err2str);

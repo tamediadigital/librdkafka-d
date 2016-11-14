@@ -6,7 +6,6 @@ __gshared Task producerTask;
 __gshared continuePoll = true;
     // pointer to the conf should be preserved for because delegates are used (for closures).
 __gshared GlobalConf conf;
-__gshared TopicConf topicConf;
 __gshared Producer producer;
 
 shared static this()
@@ -18,7 +17,6 @@ shared static this()
     
     listenHTTP(settings, &handleRequest);
     conf = new GlobalConf;
-    topicConf = new TopicConf;
     try
     {
         conf["metadata.broker.list"] = "localhost";
@@ -30,14 +28,14 @@ shared static this()
         stderr.writeln(e.msg);
         return;
     }
-    auto topic = new Topic(producer, "httplog_topic", topicConf);
+    auto topic = producer.newTopic("httplog_topic");
     /// @@@@@ Main loop
     runWorkerTask({ while(continuePoll) producer.poll(10);});
     producerTask = runTask({for (;;){
         receive((string msg) {
-            if(auto error = producer.produce(topic, Topic.PARTITION_UA, cast(void[])msg))
+            if(auto error = producer.produce(topic, Topic.unassignedPartition, cast(void[])msg))
             {
-                if(error == ErrorCode._QUEUE_FULL)
+                if(error == ErrorCode.queue_full)
                 {
                     logInfo(error.err2str);
                     vibe.core.core.yield;

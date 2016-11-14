@@ -70,6 +70,13 @@ interface Conf
 
 class GlobalConf : Conf
 {
+    ///
+    this(TopicConf defaultTopicConf = new TopicConf)
+    {
+        this.defaultTopicConf = defaultTopicConf;
+    }
+
+    private TopicConf _defaultTopicConf;
 
     /** Dump configuration names and values to list containing
    *         name,value tuples */
@@ -183,15 +190,23 @@ nothrow @nogc:
     /** Use with \p name = \c \"default_topic_conf\"
      *
      * Sets the default topic configuration to use for for automatically
-     * subscribed topics.
+     * subscribed topics and for Topic construction with producer.
      *
      * See_also: subscribe()
      */
-    void defaultTopicConf(const TopicConf topic_conf) @property
+    void defaultTopicConf(TopicConf topic_conf) @property
     {
+        _defaultTopicConf = topic_conf;
         rd_kafka_conf_set_default_topic_conf(rk_conf_,
             rd_kafka_topic_conf_dup(topic_conf.rkt_conf_));
     }
+
+    ///ditto
+    TopicConf defaultTopicConf() @property
+    {
+        return _defaultTopicConf;
+    }
+
 }
 
 class TopicConf : Conf

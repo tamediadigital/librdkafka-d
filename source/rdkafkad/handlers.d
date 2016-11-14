@@ -36,22 +36,21 @@ class Handle
     *                   The \p *metadatap pointer must be released with \c delete.
     *  \p timeout_ms  - maximum response time before failing.
     *
-    * ERR_NO_ERROR on success (in which case \p *metadatap
-    * will be set), else TIMED_OUT on timeout or
+    * ErrorCode.no_error on success (in which case \p *metadatap
+    * will be set), else timed_out on timeout or
     * other error code on error.
     */
-    ErrorCode metadata(bool all_topics, const Topic only_rkt, ref Metadata metadata, int timeout_ms) nothrow
+    Metadata metadata(bool all_topics, const Topic only_rkt, int timeout_ms = 60_000)
     {
         const rd_kafka_metadata_t* cmetadatap = null;
 
         rd_kafka_topic_t* topic = only_rkt ? cast(rd_kafka_topic_t*) only_rkt.rkt_ : null;
 
-        const rd_kafka_resp_err_t rc = rd_kafka_metadata(rk_, all_topics,
-            topic, &cmetadatap, timeout_ms);
-
-        metadata = new Metadata(cmetadatap);
-
-        return cast(ErrorCode) rc;
+        if (auto error = cast(ErrorCode)rd_kafka_metadata(rk_, all_topics, topic, &cmetadatap, timeout_ms))
+        {
+            throw new Exception(error.err2str);
+        }
+        return new Metadata(cmetadatap);
     }
 
 nothrow @nogc:
@@ -103,7 +102,7 @@ nothrow @nogc:
     *
     * Offsets are returned in \p *low and \p *high respectively.
     *
-    * ERR_NO_ERROR on success or an error code on failure.
+    * ErrorCode.no_error on success or an error code on failure.
     */
     ErrorCode queryWatermarkOffsets(const(char)* topic, int partition,
         ref long low, ref long high, int timeout_ms)
@@ -154,7 +153,7 @@ nothrow @nogc:
     *
     * the number of events served.
     */
-    int poll(int timeout_ms)
+    int poll(int timeout_ms = 10)
     {
         return rd_kafka_poll(rk_, timeout_ms);
     }
@@ -244,7 +243,7 @@ nothrow @nogc:
             return;
         }
 
-        auto event = Event(Event.Type.LOG, ErrorCode.NO_ERROR,
+        auto event = Event(Event.Type.log, ErrorCode.no_error,
             cast(Event.Severity)(level), fac, buf);
 
         handle.event_cb_(event);
@@ -255,8 +254,8 @@ nothrow @nogc:
     {
         Handle handle = cast(Handle)(opaque);
 
-        auto event = Event(Event.Type.ERROR, cast(ErrorCode) err,
-            Event.Severity.ERROR, null, reason);
+        auto event = Event(Event.Type.error, cast(ErrorCode) err,
+            Event.Severity.error, null, reason);
 
         handle.event_cb_(event);
     }
@@ -266,7 +265,7 @@ nothrow @nogc:
     {
         Handle handle = cast(Handle)(opaque);
 
-        auto event = Event(Event.Type.THROTTLE);
+        auto event = Event(Event.Type.throttle);
         event.str_ = broker_name.fromStringz;
         event.id_ = broker_id;
         event.throttle_time_ = throttle_time_ms;
@@ -278,7 +277,7 @@ nothrow @nogc:
         size_t json_len, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
-        auto event = Event(Event.Type.STATS, ErrorCode.NO_ERROR, Event.Severity.INFO,
+        auto event = Event(Event.Type.stats, ErrorCode.no_error, Event.Severity.info,
             null, json);
 
         handle.event_cb_(event);
@@ -331,7 +330,7 @@ nothrow @nogc:
     *
     * Success or error is returned per-partition in the \p partitions list.
     *
-    * ErrorCode::NO_ERROR
+    * ErrorCode::no_error
     *
     * See_also: resume()
     */
@@ -358,7 +357,7 @@ nothrow @nogc:
     *
     * Success or error is returned per-partition in the \p partitions list.
     *
-    * ErrorCode::NO_ERROR
+    * ErrorCode::no_error
     *
     * See_also: pause()
     */
@@ -392,7 +391,7 @@ nothrow @nogc:
    *
    * Offsets are returned in \p *low and \p *high respectively.
    *
-   * ERR_NO_ERROR on success or an error code on failure.
+   * ErrorCode.no_error on success or an error code on failure.
    *
    * Note: Shall only be used with an active consumer instance.
    */
@@ -402,30 +401,6 @@ nothrow @nogc:
         return cast(ErrorCode) rd_kafka_get_watermark_offsets(rk_, topic,
             partition, &low, &high);
     }
-}
-
-/**
- * Message timestamp object
- *
- * Represents the number of milliseconds since the epoch (UTC).
- *
- * The Type dictates the timestamp type or origin.
- *
- * Note: Requires Apache Kafka broker version >= 0.10.0
- *
- */
-
-struct MessageTimestamp
-{
-    enum Type
-    {
-        MSG_TIMESTAMP_NOT_AVAILABLE, /**< Timestamp not available */
-        MSG_TIMESTAMP_CREATE_TIME, /**< Message creation time (source) */
-        MSG_TIMESTAMP_LOG_APPEND_TIME /**< Message log append time (broker) */
-    }
-
-    long timestamp; /**< Milliseconds since epoch (UTC). */
-    Type type; /**< Timestamp type */
 }
 
 /**
@@ -533,7 +508,7 @@ class KafkaConsumer : Handle
 
         rd_kafka_topic_partition_list_destroy(c_parts);
 
-        return ErrorCode.NO_ERROR;
+        return ErrorCode.no_error;
 
     }
 
@@ -576,7 +551,6 @@ nothrow @nogc:
         rd_kafka_topic_partition_list_destroy(c_topics);
 
         return cast(ErrorCode) err;
-
     }
     /** Unsubscribe from the current subscription set. */
     nothrow @nogc ErrorCode unsubscribe()
@@ -601,12 +575,17 @@ nothrow @nogc:
    * Note: Application MUST NOT call \p poll() on KafkaConsumer objects.
    *
    * One of:
-   *  - proper message (Message::err() is ERR_NO_ERROR)
-   *  - error event (Message::err() is != ERR_NO_ERROR)
+   *  - proper message (Message::err() is ErrorCode.no_error)
+   *  - error event (Message::err() is != ErrorCode.no_error)
    *  - timeout due to no message or event in \p timeout_ms
-   *    (Message::err() is TIMED_OUT)
+   *    (Message::err() is timed_out)
    */
-    nothrow @nogc void consume(int timeout_ms, ref Message msg)
+   /++
+   Params:
+        msg = message to fill. Use `msg.err` to check errors.
+        timeout_ms = time to to wait if no incomming msgs in queue.
+   +/
+    nothrow @nogc void consume(ref Message msg, int timeout_ms = 10)
     {
         rd_kafka_message_t* rkmessage;
 
@@ -614,7 +593,7 @@ nothrow @nogc:
 
         if (!rkmessage)
         {
-            msg = Message(null, ErrorCode._TIMED_OUT);
+            msg = Message(null, ErrorCode.timed_out);
             return;
         }
 
@@ -658,7 +637,7 @@ nothrow @nogc:
    *         be called with commit details on a future call to
    *         consume()
    *
-   * ERR_NO_ERROR or error code.
+   * ErrorCode.no_error or error code.
    */
     ErrorCode commitSync()
     {
@@ -731,7 +710,7 @@ nothrow @nogc:
     /**
    * Retrieve committed offsets for topics+partitions.
    *
-   * RD_KAFKA_RESP_ERR_NO_ERROR on success in which case the
+   * RD_KAFKA_RESP_ErrorCode.no_error on success in which case the
    *          \p offset or \p err field of each \p partitions' element is filled
    *          in with the stored offset, or a partition specific error.
    *          Else returns an error code.
@@ -758,7 +737,7 @@ nothrow @nogc:
     /**
    * Retrieve current positions (offsets) for topics+partitions.
    *
-   * RD_KAFKA_RESP_ERR_NO_ERROR on success in which case the
+   * RD_KAFKA_RESP_ErrorCode.no_error on success in which case the
    *          \p offset or \p err field of each \p partitions' element is filled
    *          in with the stored offset, or a partition specific error.
    *          Else returns an error code.
@@ -887,7 +866,7 @@ static:
     {
         if (rd_kafka_consume_start(topic.rkt_, partition, offset) == -1)
             return cast(ErrorCode)(rd_kafka_errno2err(errno));
-        return ErrorCode.NO_ERROR;
+        return ErrorCode.no_error;
     }
 
     /**
@@ -903,7 +882,7 @@ static:
     {
         if (rd_kafka_consume_stop(topic.rkt_, partition) == -1)
             return cast(ErrorCode)(rd_kafka_errno2err(errno));
-        return ErrorCode.NO_ERROR;
+        return ErrorCode.no_error;
     }
 
     /**
@@ -912,7 +891,7 @@ static:
    *
    * If \p timeout_ms is not 0 the call will wait this long for the
    * seek to be performed. If the timeout is reached the internal state
-   * will be unknown and this function returns `TIMED_OUT`.
+   * will be unknown and this function returns `timed_out`.
    * If \p timeout_ms is 0 it will initiate the seek but return
    * immediately without any error reporting (e.g., async).
    *
@@ -924,7 +903,7 @@ static:
     {
         if (rd_kafka_seek(topic.rkt_, partition, offset, timeout_ms) == -1)
             return cast(ErrorCode)(rd_kafka_errno2err(errno));
-        return ErrorCode.NO_ERROR;
+        return ErrorCode.no_error;
     }
 
     /**
@@ -936,12 +915,12 @@ static:
    *
    * a Message object, the application needs to check if message
    * is an error or a proper message Message::err() and checking for
-   * \p ERR_NO_ERROR.
+   * \p ErrorCode.no_error.
    *
    * The message object must be destroyed when the application is done with it.
    *
    * Errors (in Message::err()):
-   *  - TIMED_OUT - \p timeout_ms was reached with no new messages fetched.
+   *  - timed_out - \p timeout_ms was reached with no new messages fetched.
    *  - PARTITION_EOF - End of partition reached, not an error.
    */
     void consume(Topic topic, int partition, int timeout_ms, ref Message msg)
@@ -965,12 +944,12 @@ static:
    *
    * a Message object, the application needs to check if message
    * is an error or a proper message \p Message.err() and checking for
-   * \p ERR_NO_ERROR.
+   * \p ErrorCode.no_error.
    *
    * The message object must be destroyed when the application is done with it.
    *
    * Errors (in Message::err()):
-   *   - TIMED_OUT - \p timeout_ms was reached with no new messages fetched
+   *   - timed_out - \p timeout_ms was reached with no new messages fetched
    *
    * Note that Message.topic() may be nullptr after certain kinds of
    * errors, so applications should check that it isn't null before
@@ -1099,6 +1078,7 @@ static:
  */
 class Producer : Handle
 {
+    package GlobalConf _conf;
     /**
    * Creates a new Kafka producer handle.
    *
@@ -1108,7 +1088,7 @@ class Producer : Handle
    */
     this(GlobalConf conf)
     {
-
+        _conf = conf;
         char[512] errbuf = void;
         rd_kafka_conf_t* rk_conf = null;
 
@@ -1137,6 +1117,20 @@ class Producer : Handle
         }
     }
 
+    /++
+    Returns: new topic for this producer
+    Params:
+        topic = topic name
+        topicConf = TopicConf, if null `defaultTopicConf` should be setted to the global configuration.
+    +/
+    Topic newTopic(const(char)[] topic, TopicConf topicConf = null)
+    {
+        if(!topicConf)
+            topicConf = _conf.defaultTopicConf;
+        assert(topicConf);
+        return new Topic(this, topic, topicConf);
+    }
+
 nothrow @nogc:
 
      ~this()
@@ -1147,15 +1141,6 @@ nothrow @nogc:
         }
     }
 
-    private static void dr_msg_cb_trampoline(rd_kafka_t* rk,
-        const rd_kafka_message_t* rkmessage, void* opaque)
-    {
-        auto handle = cast(Handle) opaque;
-        auto message = Message(null, rkmessage);
-        handle.dr_cb_(message);
-        message.destroy;
-    }
-
     /**
    * Producer::produce() \p msgflags
    *
@@ -1163,13 +1148,13 @@ nothrow @nogc:
    */
    enum MsgOpt
    {
-        FREE = 0x1, /**< rdkafka will free(3) \p payload
+        free = 0x1, /**< rdkafka will free(3) \p payload
                                             * when it is done with it. */
-        COPY = 0x2, /**< the \p payload data will be copied
+        copy = 0x2, /**< the \p payload data will be copied
                                            * and the \p payload pointer will not
                                            * be used by rdkafka after the
                                            * call returns. */
-        BLOCK = 0x4, /**< Block produce*() on message queue
+        block = 0x4, /**< Block produce*() on message queue
               *   full.
               *   WARNING:
               *   If a delivery report callback
@@ -1185,6 +1170,15 @@ nothrow @nogc:
               */
    }
 
+    private static void dr_msg_cb_trampoline(rd_kafka_t* rk,
+        const rd_kafka_message_t* rkmessage, void* opaque)
+    {
+        auto handle = cast(Handle) opaque;
+        auto message = Message(null, rkmessage);
+        handle.dr_cb_(message);
+        message.destroy;
+    }
+
     /**
    * Produce and send a single message to broker.
    *
@@ -1196,7 +1190,7 @@ nothrow @nogc:
    *   - a fixed partition (0..N)
    *
    * \p msgflags is zero or more of the following flags OR:ed together:
-   *    RK_MSG_BLOCK - block \p produce*() call if
+   *    block - block \p produce*() call if
    *                   \p queue.buffering.max.messages or
    *                   \p queue.buffering.max.kbytes are exceeded.
    *                   Messages are considered in-queue from the point they
@@ -1204,16 +1198,16 @@ nothrow @nogc:
    *                   delivery report callback/event returns.
    *                   It is thus a requirement to call 
    *                   poll() (or equiv.) from a separate
-   *                   thread when RK_MSG_BLOCK is used.
-   *                   See WARNING on \c RK_MSG_BLOCK above.
-   *    RK_MSG_FREE - rdkafka will free(3) \p payload when it is done with it.
-   *    RK_MSG_COPY - the \p payload data will be copied and the \p payload
+   *                   thread when block is used.
+   *                   See WARNING on \c block above.
+   *    free - rdkafka will free(3) \p payload when it is done with it.
+   *    copy - the \p payload data will be copied and the \p payload
    *               pointer will not be used by rdkafka after the
    *               call returns.
    *
-   *  NOTE: RK_MSG_FREE and RK_MSG_COPY are mutually exclusive.
+   *  NOTE: free and copy are mutually exclusive.
    *
-   *  If the function returns -1 and RK_MSG_FREE was specified, then
+   *  If the function returns -1 and free was specified, then
    *  the memory associated with the payload is still the caller's
    *  responsibility.
    *
@@ -1240,12 +1234,12 @@ nothrow @nogc:
    *  - _UNKNOWN_TOPIC     - topic is unknown in the Kafka cluster.
    */
     ErrorCode produce(Topic topic, int partition, void[] payload,
-        const(void)[] key = null, int msgflags = MsgOpt.COPY, void* msg_opaque = null)
+        const(void)[] key = null, int msgflags = MsgOpt.copy, void* msg_opaque = null)
     {
         if (rd_kafka_produce(topic.rkt_, partition, msgflags, payload.ptr,
                 payload.length, key.ptr, key.length, msg_opaque) == -1)
             return cast(ErrorCode) rd_kafka_errno2err(errno);
-        return ErrorCode.NO_ERROR;
+        return ErrorCode.no_error;
     }
 
     /**
@@ -1256,10 +1250,10 @@ nothrow @nogc:
    *
    * Note: This function will call poll() and thus trigger callbacks.
    *
-   * TIMED_OUT if \p timeout_ms was reached before all
-   *          outstanding requests were completed, else ERR_NO_ERROR
+   * timed_out if \p timeout_ms was reached before all
+   *          outstanding requests were completed, else ErrorCode.no_error
    */
-    ErrorCode flush(int timeout_ms)
+    ErrorCode flush(int timeout_ms = 60_000)
     {
         return cast(ErrorCode) rd_kafka_flush(rk_, timeout_ms);
     }
