@@ -12,7 +12,6 @@ void main()
     /// @@@@@ Configuration
     // pointer to the conf should be preserved for because delegates are used (for closures).
 	auto conf = new GlobalConf;
-    auto topicConf = new TopicConf;
     Producer producer;
     try
     {
@@ -25,7 +24,6 @@ void main()
         stderr.writeln(e.msg);
         return;
     }
-    conf.defaultTopicConf = topicConf;
     auto topics = [
         producer.newTopic("httplog_topic"),
     ];

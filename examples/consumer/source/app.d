@@ -6,7 +6,6 @@ void main()
     /// @@@@@ Configuration
     // pointer to the conf should be preserved for because delegates are used (for closures).
 	auto conf = new GlobalConf;
-    auto topicConf = new TopicConf;
     KafkaConsumer consumer;
     try
     {
@@ -19,7 +18,6 @@ void main()
         stderr.writeln(e.msg);
         return;
     }
-    conf.defaultTopicConf = topicConf;
     consumer.subscribe("httplog_topic", /+...+/);
     for (size_t c;;)
     {

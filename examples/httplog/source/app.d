@@ -6,7 +6,6 @@ __gshared Task producerTask;
 __gshared continuePoll = true;
     // pointer to the conf should be preserved for because delegates are used (for closures).
 __gshared GlobalConf conf;
-__gshared TopicConf topicConf;
 __gshared Producer producer;
 
 shared static this()
@@ -18,7 +17,6 @@ shared static this()
     
     listenHTTP(settings, &handleRequest);
     conf = new GlobalConf;
-    topicConf = new TopicConf;
     try
     {
         conf["metadata.broker.list"] = "localhost";
@@ -30,7 +28,6 @@ shared static this()
         stderr.writeln(e.msg);
         return;
     }
-    conf.defaultTopicConf = topicConf;
     auto topic = producer.newTopic("httplog_topic");
     /// @@@@@ Main loop
     runWorkerTask({ while(continuePoll) producer.poll(10);});

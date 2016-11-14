@@ -70,6 +70,12 @@ interface Conf
 
 class GlobalConf : Conf
 {
+    ///
+    this(TopicConf defaultTopicConf = new TopicConf)
+    {
+        this.defaultTopicConf = defaultTopicConf;
+    }
+
     private TopicConf _defaultTopicConf;
 
     /** Dump configuration names and values to list containing
