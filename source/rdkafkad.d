@@ -502,7 +502,6 @@ alias ConsumeCb = void delegate(ref Message message) nothrow @nogc;
 * arbitrary rebalancing failures where \p err is neither of those.
 * Note: In this latter case (arbitrary error), the application must
 *         call unassign() to synchronize state.
-
 *
 * Without a rebalance callback this is done automatically by librdkafka
 * but registering a rebalance callback gives the application flexibility
@@ -610,7 +609,7 @@ interface Conf
      * OK on success, else writes a human readable error
      *          description to \p errstr on error.
      */
-    void opIndex(in char[] name, in char[] value);
+    void opIndexAssign(in char[] value, in char[] name);
 
     /** Query single configuration value
    *  OK if the property was set previously set and
@@ -631,7 +630,7 @@ class GlobalConf : Conf
         auto arrc = rd_kafka_conf_dump(rk_conf_, &cnt);
         auto arr = new string[cnt];
         foreach (size_t i; 0 .. cnt)
-            arr[i] = cast(string) arrc[i].fromStringz;
+            arr[i] = arrc[i].fromStringz.idup;
         rd_kafka_conf_dump_free(arrc, cnt);
         return arr;
     }
@@ -641,7 +640,7 @@ class GlobalConf : Conf
      * OK on success, else writes a human readable error
      *          description to \p errstr on error.
      */
-    void opIndex(in char[] name, in char[] value)
+    void opIndexAssign(in char[] value, in char[] name)
     {
         char[512] errbuf = void;
 
@@ -649,7 +648,7 @@ class GlobalConf : Conf
             value.toStringz(), errbuf.ptr, errbuf.sizeof);
         if (res != rd_kafka_conf_res_t.RD_KAFKA_CONF_OK)
             throw new ConfException(cast(ConfException.Result) res,
-                cast(string) errbuf.ptr.fromStringz);
+                errbuf.ptr.fromStringz.idup);
     }
 
     /** Query single configuration value
@@ -739,7 +738,7 @@ nothrow @nogc:
      *
      * See_also: subscribe()
      */
-    void defaultTopicConf(in char[] name, const TopicConf topic_conf)
+    void defaultTopicConf(const TopicConf topic_conf) @property
     {
         rd_kafka_conf_set_default_topic_conf(rk_conf_,
             rd_kafka_topic_conf_dup(topic_conf.rkt_conf_));
@@ -753,7 +752,7 @@ class TopicConf : Conf
      * OK on success, else writes a human readable error
      *          description to \p errstr on error.
      */
-    void opIndex(in char[] name, in char[] value)
+    void opIndexAssign(in char[] value, in char[] name)
     {
         rd_kafka_conf_res_t res;
         char[512] errbuf = void;
@@ -763,7 +762,7 @@ class TopicConf : Conf
 
         if (res != rd_kafka_conf_res_t.RD_KAFKA_CONF_OK)
             throw new ConfException(cast(ConfException.Result) res,
-                cast(string) errbuf.ptr.fromStringz);
+                errbuf.ptr.fromStringz.idup);
     }
 
     /** Query single configuration value
@@ -791,7 +790,7 @@ class TopicConf : Conf
         auto arrc = rd_kafka_topic_conf_dump(rkt_conf_, &cnt);
         auto arr = new string[cnt];
         foreach (size_t i; 0 .. cnt)
-            arr[i] = cast(string) arrc[i].fromStringz;
+            arr[i] = arrc[i].fromStringz.idup;
         rd_kafka_conf_dump_free(arrc, cnt);
         return arr;
     }
@@ -844,13 +843,42 @@ class Handle
     * Last assigned member id, or empty string if not currently
     *          a group member.
     */
-    string memberid() const
+    string memberid() const nothrow
     {
         char* str = rd_kafka_memberid(rk_);
-        string memberid = cast(string) str.fromStringz;
+        string memberid = str.fromStringz.idup;
         if (str)
             rd_kafka_mem_free(cast(rd_kafka_s*) rk_, str);
         return memberid;
+    }
+
+    /**
+    * Request Metadata from broker.
+    *
+    * Parameters:
+    *  \p all_topics  - if non-zero: request info about all topics in cluster,
+    *                   if zero: only request info about locally known topics.
+    *  \p only_rkt    - only request info about this topic
+    *  \p metadatap   - pointer to hold metadata result.
+    *                   The \p *metadatap pointer must be released with \c delete.
+    *  \p timeout_ms  - maximum response time before failing.
+    *
+    * ERR_NO_ERROR on success (in which case \p *metadatap
+    * will be set), else TIMED_OUT on timeout or
+    * other error code on error.
+    */
+    ErrorCode metadata(bool all_topics, const Topic only_rkt, ref Metadata metadata, int timeout_ms) nothrow
+    {
+        const rd_kafka_metadata_t* cmetadatap = null;
+
+        rd_kafka_topic_t* topic = only_rkt ? cast(rd_kafka_topic_t*) only_rkt.rkt_ : null;
+
+        const rd_kafka_resp_err_t rc = rd_kafka_metadata(rk_, all_topics,
+            topic, &cmetadatap, timeout_ms);
+
+        metadata = new Metadata(cmetadatap);
+
+        return cast(ErrorCode) rc;
     }
 
 nothrow @nogc:
@@ -970,35 +998,6 @@ nothrow @nogc:
     }
 
     /**
-    * Request Metadata from broker.
-    *
-    * Parameters:
-    *  \p all_topics  - if non-zero: request info about all topics in cluster,
-    *                   if zero: only request info about locally known topics.
-    *  \p only_rkt    - only request info about this topic
-    *  \p metadatap   - pointer to hold metadata result.
-    *                   The \p *metadatap pointer must be released with \c delete.
-    *  \p timeout_ms  - maximum response time before failing.
-    *
-    * ERR_NO_ERROR on success (in which case \p *metadatap
-    * will be set), else TIMED_OUT on timeout or
-    * other error code on error.
-    */
-    ErrorCode metadata(bool all_topics, const Topic only_rkt, ref Metadata metadata, int timeout_ms)
-    {
-        const rd_kafka_metadata_t* cmetadatap = null;
-
-        rd_kafka_topic_t* topic = only_rkt ? cast(rd_kafka_topic_t*) only_rkt.rkt_ : null;
-
-        const rd_kafka_resp_err_t rc = rd_kafka_metadata(rk_, all_topics,
-            topic, &cmetadatap, timeout_ms);
-
-        metadata = Metadata(cmetadatap);
-
-        return cast(ErrorCode) rc;
-    }
-
-    /**
      * Convert a list of C partitions to C++ partitions
      */
     private static TopicPartition[] c_parts_to_partitions(
@@ -1019,16 +1018,13 @@ nothrow @nogc:
         v = null;
     }
 
-    private static rd_kafka_topic_partition_list_t* partitions_to_c_parts(
-        const TopicPartition[] partitions)
+    private static rd_kafka_topic_partition_list_t* partitions_to_c_parts(const TopicPartition[] partitions)
     {
-        rd_kafka_topic_partition_list_t* c_parts = rd_kafka_topic_partition_list_new(
-            cast(int) partitions.length);
+        rd_kafka_topic_partition_list_t* c_parts = rd_kafka_topic_partition_list_new(cast(int) partitions.length);
 
         foreach (ref tpi; partitions)
         {
-            rd_kafka_topic_partition_t* rktpar = rd_kafka_topic_partition_list_add(c_parts,
-                tpi.topic_, tpi.partition_);
+            rd_kafka_topic_partition_t* rktpar = rd_kafka_topic_partition_list_add(c_parts, tpi.topic_, tpi.partition_);
             rktpar.offset = tpi.offset_;
         }
 
@@ -1166,7 +1162,7 @@ nothrow @nogc:
     *
     * See_also: resume()
     */
-    nothrow ErrorCode pause(TopicPartition[] partitions)
+    ErrorCode pause(TopicPartition[] partitions)
     {
         rd_kafka_topic_partition_list_t* c_parts;
         rd_kafka_resp_err_t err;
@@ -1193,7 +1189,7 @@ nothrow @nogc:
     *
     * See_also: pause()
     */
-    nothrow ErrorCode resume(TopicPartition[] partitions)
+    ErrorCode resume(TopicPartition[] partitions)
     {
         rd_kafka_topic_partition_list_t* c_parts;
         rd_kafka_resp_err_t err;
@@ -1253,9 +1249,9 @@ struct TopicPartition
 
     void toString(in void delegate(const(char)[]) sink) const
     {
+        sink(topic);
         import std.format;
-
-        sink.formattedWrite("%s[%s]", topic_, partition_);
+        sink.formattedWrite("[%s]", partition_);
     }
 
 nothrow @nogc:
@@ -1417,7 +1413,7 @@ nothrow @nogc:
     }
 
     /** the topic name */
-    const(char)[] name() const
+    final const(char)[] name() const
     {
         return rd_kafka_topic_name(rkt_).fromStringz;
     }
@@ -1427,7 +1423,7 @@ nothrow @nogc:
    * Warning: \b MUST \b ONLY be called from within a
    *          PartitionerCb callback.
    */
-    bool partitionAvailable(int partition) const
+    final bool partitionAvailable(int partition) const
     {
         return cast(bool) rd_kafka_topic_partition_available(rkt_, partition);
     }
@@ -1443,7 +1439,7 @@ nothrow @nogc:
    *
    * ERR_NO_ERROR on success or an error code on error.
    */
-    ErrorCode offsetStore(int partition, long offset)
+    final ErrorCode offsetStore(int partition, long offset)
     {
         return cast(ErrorCode) rd_kafka_offset_store(rkt_, partition, offset);
     }
@@ -1490,18 +1486,11 @@ struct Message
 nothrow @nogc:
      ~this()
     {
-        if (free_rkmessage_)
+        if (free_rkmessage_ && rkmessage_)
             rd_kafka_message_destroy(cast(rd_kafka_message_t*) rkmessage_);
     }
 
-    this(Topic topic, rd_kafka_message_t* rkmessage)
-    {
-        topic_ = topic;
-        rkmessage_ = rkmessage;
-        free_rkmessage_ = true;
-    }
-
-    this(Topic topic, rd_kafka_message_t* rkmessage, bool dofree)
+    this(Topic topic, rd_kafka_message_t* rkmessage, bool dofree = true)
     {
         topic_ = topic;
         rkmessage_ = rkmessage;
@@ -1697,7 +1686,7 @@ class KafkaConsumer : Handle
         if (null is(rk = rd_kafka_new(rd_kafka_type_t.RD_KAFKA_CONSUMER, rk_conf,
                 errbuf.ptr, errbuf.sizeof)))
         {
-            throw new Exception(cast(string) errbuf.ptr.fromStringz);
+            throw new Exception(errbuf.ptr.fromStringz.idup);
         }
 
         this.rk_ = rk;
@@ -1707,7 +1696,7 @@ class KafkaConsumer : Handle
     }
 
     /** Returns the current partition assignment as set by
-   *         assign() */
+     *  assign() */
     ErrorCode assignment(ref TopicPartition[] partitions) nothrow
     {
         rd_kafka_topic_partition_list_t* c_parts;
@@ -1725,25 +1714,6 @@ class KafkaConsumer : Handle
 
         return ErrorCode.NO_ERROR;
 
-    }
-
-    /** Returns the current subscription as set by
-   *         subscribe() */
-    ErrorCode subscription(ref string[] topics) nothrow
-    {
-        rd_kafka_topic_partition_list_t* c_topics;
-        rd_kafka_resp_err_t err;
-
-        if (0 != (err = rd_kafka_subscription(rk_, &c_topics)))
-            return cast(ErrorCode) err;
-
-        topics.length = c_topics.cnt;
-        for (int i = 0; i < c_topics.cnt; i++)
-            topics[i] = cast(string) c_topics.elems[i].topic.fromStringz;
-
-        rd_kafka_topic_partition_list_destroy(c_topics);
-
-        return ErrorCode.NO_ERROR;
     }
 
 nothrow @nogc:
@@ -1800,8 +1770,6 @@ nothrow @nogc:
    * including RebalanceCb, EventCb, OffsetCommitCb,
    * etc.
    *
-   * Note: Use \c delete to free the message.
-   *
    * Note:  An application should make sure to call consume() at regular
    *          intervals, even if no messages are expected, to serve any
    *          queued callbacks waiting to be called. This is especially
@@ -1824,7 +1792,10 @@ nothrow @nogc:
         rkmessage = rd_kafka_consumer_poll(this.rk_, timeout_ms);
 
         if (!rkmessage)
+        {
             msg = Message(null, ErrorCode._TIMED_OUT);
+            return;
+        }
 
         msg = Message(rkmessage);
     }
@@ -2059,7 +2030,7 @@ class Consumer : Handle
         if (null is(rk_ = rd_kafka_new(rd_kafka_type_t.RD_KAFKA_CONSUMER,
                 rk_conf, errbuf.ptr, errbuf.sizeof)))
         {
-            throw new Exception(cast(string) errbuf.ptr.fromStringz);
+            throw new Exception(errbuf.ptr.fromStringz.idup);
         }
     }
 
@@ -2313,11 +2284,8 @@ class Producer : Handle
    * \p conf is an optional object that will be used instead of the default
    * configuration.
    * The \p conf object is reusable after this call.
-   *
-   * the new handle on success or null on error in which case
-   *          \p errstr is set to a human readable error message.
    */
-    this(GlobalConf conf, ref char[] errstr)
+    this(GlobalConf conf)
     {
 
         char[512] errbuf = void;
@@ -2344,7 +2312,7 @@ class Producer : Handle
         if (null is(rk_ = rd_kafka_new(rd_kafka_type_t.RD_KAFKA_PRODUCER,
                 rk_conf, errbuf.ptr, errbuf.sizeof)))
         {
-            throw new Exception(cast(string) errbuf.ptr.fromStringz);
+            throw new Exception(errbuf.ptr.fromStringz.idup);
         }
     }
 
@@ -2439,16 +2407,16 @@ nothrow @nogc:
    * referencing this message.
    *
    * an ErrorCode to indicate success or failure:
-   *  - QUEUE_FULL - maximum number of outstanding messages has been
+   *  - _QUEUE_FULL - maximum number of outstanding messages has been
    *                      reached: \c queue.buffering.max.message
    *
-   *  - ERR_MSG_SIZE_TOO_LARGE - message is larger than configured max size:
+   *  - MSG_SIZE_TOO_LARGE - message is larger than configured max size:
    *                            \c messages.max.bytes
    *
-   *  - UNKNOWN_PARTITION - requested \p partition is unknown in the
+   *  - _UNKNOWN_PARTITION - requested \p partition is unknown in the
    *                           Kafka cluster.
    *
-   *  - UNKNOWN_TOPIC     - topic is unknown in the Kafka cluster.
+   *  - _UNKNOWN_TOPIC     - topic is unknown in the Kafka cluster.
    */
     ErrorCode produce(Topic topic, int partition, void[] payload,
         const(void)[] key = null, int msgflags = Msg.COPY, void* msg_opaque = null)
@@ -2655,11 +2623,23 @@ const @property nothrow @nogc:
 /**
  * Metadata container
  */
-struct Metadata
+final class Metadata
 {
     private const(rd_kafka_metadata_t)* metadata_;
 
-const @property nothrow @nogc:
+nothrow @nogc:
+
+    this(const(rd_kafka_metadata_t)* metadata)
+    {
+        metadata_ = metadata;
+    }
+
+    ~this()
+    {
+        rd_kafka_metadata_destroy(metadata_);
+    }
+
+const @property:
 
     /** Broker list */
     auto brokers() 
@@ -2689,7 +2669,7 @@ const @property nothrow @nogc:
                 return metadata_.broker_cnt - _i;
             }
         }
-
+        assert(metadata_);
         return Brokers(metadata_);
     }
 
@@ -2721,7 +2701,7 @@ const @property nothrow @nogc:
                 return metadata_.topic_cnt - _i;
             }
         }
-
+        assert(metadata_);
         return Topics(metadata_);
     }
 
