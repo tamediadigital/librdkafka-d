@@ -32,15 +32,6 @@ nothrow @nogc:
    *
    * Use \c delete to deconstruct.
    */
-    nothrow this(const(char)* topic, int partition)
-    {
-        topic_ = topic;
-        partition_ = partition;
-        offset_ = Offset.invalid;
-        err_ = ErrorCode.no_error;
-    }
-
-    /// ditto
     this(const(char)* topic, int partition)
     {
         topic_ = topic;
