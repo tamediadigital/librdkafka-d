@@ -1,5 +1,5 @@
 {
-	"name": "rdkafka-d",
+	"name": "librdkafka-d",
 	"authors": [
 		"Ilya Yaroshenko (Converted from the CPP wrapper)"
 	],
