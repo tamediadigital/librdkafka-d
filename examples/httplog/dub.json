@@ -8,7 +8,7 @@
 	"license": "BSL-1.0",
 	"dependencies":{
         "vibe-d": "~>0.7.25",
-		"rdkafka-d": {"path" : "../../"}
+		"librdkafka-d": {"path" : "../../"}
 	},
     "versions": ["VibeDefaultMain"]
 }

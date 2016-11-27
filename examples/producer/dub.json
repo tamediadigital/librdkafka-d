@@ -7,6 +7,6 @@
 	"copyright": "Copyright © 2016, Tamedia AG",
 	"license": "BSL-1.0",
 	"dependencies":{
-		"rdkafka-d": {"path" : "../../"}
+		"librdkafka-d": {"path" : "../../"}
 	}
 }
