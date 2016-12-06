@@ -134,14 +134,6 @@ nothrow @nogc:
             rd_kafka_conf_destroy(rk_conf_);
     }
 
-    /**
-    * Create configuration object
-    */
-    this()
-    {
-        rk_conf_ = rd_kafka_conf_new();
-    }
-
     package DeliveryReportCb dr_cb_;
     package EventCb event_cb_;
     package SocketCb socket_cb_;
