@@ -73,6 +73,7 @@ class GlobalConf : Conf
     ///
     this(TopicConf defaultTopicConf = new TopicConf)
     {
+        rk_conf_ = rd_kafka_conf_new;
         this.defaultTopicConf = defaultTopicConf;
     }
 
