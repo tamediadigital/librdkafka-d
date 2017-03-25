@@ -25,13 +25,22 @@ struct TopicPartition
         sink.formattedWrite("[%s]", partition_);
     }
 
-nothrow @nogc:
-
-    /**
+   /**
    * Create topic+partition object for \p topic and \p partition.
    *
    * Use \c delete to deconstruct.
    */
+
+    nothrow:
+
+    /// ditto
+    this(const(char)[] topic, int partition)
+    {
+        this(topic.toStringz, partition);
+    }
+
+    @nogc:
+
     this(const(char)* topic, int partition)
     {
         topic_ = topic;
@@ -39,6 +48,7 @@ nothrow @nogc:
         offset_ = Offset.invalid;
         err_ = ErrorCode.no_error;
     }
+
 
     package this(const rd_kafka_topic_partition_t* c_part)
     {
