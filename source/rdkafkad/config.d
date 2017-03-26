@@ -1,6 +1,7 @@
 ///
 module rdkafkad.config;
 import rdkafkad;
+import rdkafkad.iodriver;
 
 /**
  * \b Portability: OpenCb callback class
