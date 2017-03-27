@@ -169,9 +169,19 @@ mixin("@nogc nothrow:");
     int poll(int timeout_ms = 10)
     {
         typeof(return) ret;
-        mixin(IO!q{
-        ret = rd_kafka_poll(rk_, timeout_ms);
-        });
+        static if (have_vibed == true)
+        {
+            import vibe.core.core: sleep;
+            import core.time: msecs;
+            ret = rd_kafka_poll(rk_, 0);
+            if (ret == 0 && timeout_ms)
+                sleep(timeout_ms.msecs);
+        }
+        else
+        {
+            static assert(0);
+            ret = rd_kafka_poll(rk_, timeout_ms);
+        }
         return ret;
     }
 

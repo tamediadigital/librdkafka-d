@@ -2,7 +2,7 @@ module rdkafkad.iodriver;
 
 version(Have_vibe_d)
 {
-    enum have_vibed = true;
+    enum bool have_vibed = true;
     import vibe.core.task: Task;
     import vibe.core.concurrency: receiveCompat, Isolated;
     import vibe.core.core: runWorkerTaskH;
@@ -77,11 +77,11 @@ version(Have_vibe_d)
 else
 version(Have_vibe_core)
 {
-    enum have_vibed = true;
+    enum bool have_vibed = true;
     static assert("rdkafkad: support for vibe-core >=1.0.0 is not implemented yet.");
 }
 else
 {
-    enum have_vibed = false;
+    enum bool have_vibed = false;
     enum IO(string code) = "{" ~ code ~ "}";
 }
