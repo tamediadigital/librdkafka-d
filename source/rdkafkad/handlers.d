@@ -179,7 +179,6 @@ mixin("@nogc nothrow:");
         }
         else
         {
-            static assert(0);
             ret = rd_kafka_poll(rk_, timeout_ms);
         }
         return ret;
