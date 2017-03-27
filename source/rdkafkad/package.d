@@ -108,7 +108,7 @@ const(char)[] getDebugContexts() nothrow @nogc
  * \p wait_destroyed() function can be used for applications where
  * a clean shutdown is required.
  */
-int waitDestroyed(int timeout_ms) nothrow @nogc
+auto waitDestroyed(int timeout_ms)
 {
     int ret;
     mixin(IO!q{

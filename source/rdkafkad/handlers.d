@@ -17,7 +17,7 @@ class Handle
     * Last assigned member id, or empty string if not currently
     *          a group member.
     */
-    string memberid() const nothrow
+    auto memberid() const
     {
         char* str;
         mixin(IO!q{
@@ -50,16 +50,19 @@ class Handle
 
         rd_kafka_topic_t* topic = only_rkt ? cast(rd_kafka_topic_t*) only_rkt.rkt_ : null;
 
+        ErrorCode error;
         mixin(IO!q{
-        if (auto error = cast(ErrorCode)rd_kafka_metadata(rk_, all_topics, topic, &cmetadatap, timeout_ms))
+        error = cast(ErrorCode)rd_kafka_metadata(rk_, all_topics, topic, &cmetadatap, timeout_ms); 
+        });
+        if (error)
         {
             throw new Exception(error.err2str);
         }
-        });
         return new Metadata(cmetadatap);
     }
 
-nothrow @nogc:
+static if (!have_vibed)
+mixin("@nogc nothrow:");
 
     package void setCommonConfig(GlobalConf conf)
     {
@@ -110,10 +113,10 @@ nothrow @nogc:
     *
     * ErrorCode.no_error on success or an error code on failure.
     */
-    ErrorCode queryWatermarkOffsets(const(char)* topic, int partition,
+    auto queryWatermarkOffsets(const(char)* topic, int partition,
         ref long low, ref long high, int timeout_ms)
     {
-        typeof(return) ret;
+        ErrorCode ret;
         mixin(IO!q{
         ret = cast(ErrorCode) rd_kafka_query_watermark_offsets(rk_, topic,
             partition, &low, &high, timeout_ms);
@@ -190,7 +193,7 @@ nothrow @nogc:
     /**
      * Convert a list of C partitions to C++ partitions
      */
-    private static TopicPartition[] c_parts_to_partitions(
+    nothrow @nogc private static TopicPartition[] c_parts_to_partitions(
         const rd_kafka_topic_partition_list_t* c_parts)
     {
         auto partitions = (cast(TopicPartition*) malloc(c_parts.cnt * TopicPartition.sizeof))[0
@@ -200,7 +203,7 @@ nothrow @nogc:
         return partitions;
     }
 
-    static void free_partition_vector(ref TopicPartition[] v)
+    nothrow @nogc static void free_partition_vector(ref TopicPartition[] v)
     {
         foreach (ref p; v)
             p.destroy;
@@ -208,7 +211,7 @@ nothrow @nogc:
         v = null;
     }
 
-    private static rd_kafka_topic_partition_list_t* partitions_to_c_parts(const TopicPartition[] partitions)
+    nothrow @nogc private static rd_kafka_topic_partition_list_t* partitions_to_c_parts(const TopicPartition[] partitions)
     {
         rd_kafka_topic_partition_list_t* c_parts = rd_kafka_topic_partition_list_new(cast(int) partitions.length);
 
@@ -224,7 +227,7 @@ nothrow @nogc:
     /**
      * @brief Update the application provided 'partitions' with info from 'c_parts'
      */
-    private static void update_partitions_from_c_parts(TopicPartition[] partitions,
+    nothrow @nogc private static void update_partitions_from_c_parts(TopicPartition[] partitions,
         const rd_kafka_topic_partition_list_t* c_parts)
     {
         foreach (i; 0 .. c_parts.cnt)
@@ -243,7 +246,7 @@ nothrow @nogc:
         }
     }
 
-    private static void log_cb_trampoline(const rd_kafka_t* rk, int level,
+    nothrow @nogc private static void log_cb_trampoline(const rd_kafka_t* rk, int level,
         const(char)* fac, const(char)* buf)
     {
         if (!rk)
@@ -267,7 +270,7 @@ nothrow @nogc:
         handle.event_cb_(event);
     }
 
-    private static void error_cb_trampoline(rd_kafka_t* rk, int err,
+    nothrow @nogc private static void error_cb_trampoline(rd_kafka_t* rk, int err,
         const(char)* reason, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
@@ -278,7 +281,7 @@ nothrow @nogc:
         handle.event_cb_(event);
     }
 
-    private static void throttle_cb_trampoline(rd_kafka_t* rk,
+    nothrow @nogc private static void throttle_cb_trampoline(rd_kafka_t* rk,
         const(char)* broker_name, int broker_id, int throttle_time_ms, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
@@ -291,7 +294,7 @@ nothrow @nogc:
         handle.event_cb_(event);
     }
 
-    private static int stats_cb_trampoline(rd_kafka_t* rk, char* json,
+    nothrow @nogc private static int stats_cb_trampoline(rd_kafka_t* rk, char* json,
         size_t json_len, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
@@ -303,14 +306,14 @@ nothrow @nogc:
         return 0;
     }
 
-    private static int socket_cb_trampoline(int domain, int type, int protocol, void* opaque)
+    nothrow @nogc private static int socket_cb_trampoline(int domain, int type, int protocol, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
 
         return handle.socket_cb_(domain, type, protocol);
     }
 
-    private static int open_cb_trampoline(const(char)* pathname, int flags,
+    nothrow @nogc private static int open_cb_trampoline(const(char)* pathname, int flags,
         mode_t mode, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
@@ -318,7 +321,7 @@ nothrow @nogc:
         return handle.open_cb_(pathname.fromStringz, flags, cast(int)(mode));
     }
 
-    private static void rebalance_cb_trampoline(rd_kafka_t* rk,
+    nothrow @nogc private static void rebalance_cb_trampoline(rd_kafka_t* rk,
         rd_kafka_resp_err_t err, rd_kafka_topic_partition_list_t* c_partitions, void* opaque)
     {
         auto handle = cast(KafkaConsumer)(opaque);
@@ -329,7 +332,7 @@ nothrow @nogc:
         free_partition_vector(partitions);
     }
 
-    private static void offset_commit_cb_trampoline(rd_kafka_t* rk,
+    nothrow @nogc private static void offset_commit_cb_trampoline(rd_kafka_t* rk,
         rd_kafka_resp_err_t err, rd_kafka_topic_partition_list_t* c_offsets, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
@@ -509,9 +512,12 @@ class KafkaConsumer : Handle
         rd_kafka_poll_set_consumer(rk);
     }
 
+static if (!have_vibed)
+mixin("nothrow:");
+
     /** Returns the current partition assignment as set by
      *  assign() */
-    ErrorCode assignment(ref TopicPartition[] partitions) nothrow
+    ErrorCode assignment(ref TopicPartition[] partitions) 
     {
         rd_kafka_topic_partition_list_t* c_parts;
         rd_kafka_resp_err_t err;
@@ -533,7 +539,8 @@ class KafkaConsumer : Handle
 
     }
 
-nothrow @nogc:
+static if (!have_vibed)
+@nogc:
 
   /**
    * Update the subscription set to \p topics.
@@ -901,7 +908,8 @@ class Consumer : Handle
         }
     }
 
-nothrow @nogc:
+static if (!have_vibed)
+mixin("nothrow @nogc:");
 
      ~this()
     {
@@ -1216,13 +1224,16 @@ class Producer : Handle
         return new Topic(this, topic, topicConf);
     }
 
-nothrow @nogc:
+static if (!have_vibed)
+mixin("nothrow @nogc:");
 
      ~this()
     {
         if (rk_)
         {
+            mixin(IO!q{
             rd_kafka_destroy(rk_);
+            });
         }
     }
 
@@ -1255,7 +1266,7 @@ nothrow @nogc:
               */
    }
 
-    private static void dr_msg_cb_trampoline(rd_kafka_t* rk,
+    nothrow @nogc private static void dr_msg_cb_trampoline(rd_kafka_t* rk,
         const rd_kafka_message_t* rkmessage, void* opaque)
     {
         auto handle = cast(Handle) opaque;

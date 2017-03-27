@@ -142,8 +142,9 @@ class Topic
                 this.partitioner_kp_cb_ = conf.partitioner_kp_cb_;
             }
         }
+        auto str0 = topic_str.toStringz();
         mixin(IO!q{
-        rkt_ = rd_kafka_topic_new(base.rk_, topic_str.toStringz(), rkt_conf);
+        rkt_ = rd_kafka_topic_new(base.rk_, str0, rkt_conf);
         });
         if (!rkt_)
         {
@@ -153,7 +154,8 @@ class Topic
         }
     }
 
-nothrow @nogc:
+static if(have_vibed)
+mixin("nothrow @nogc:");
 
      ~this()
     {
