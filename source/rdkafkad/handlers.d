@@ -1117,8 +1117,12 @@ static:
     int consumeCallback(Topic topic, int partition, int timeout_ms, ConsumeCb consume_cb)
     {
         auto context = ConsumerCallback(topic, consume_cb);
-        return rd_kafka_consume_callback(topic.rkt_, partition, timeout_ms,
+        int ret;
+        mixin(IO!q{
+        ret = rd_kafka_consume_callback(topic.rkt_, partition, timeout_ms,
             &ConsumerCallback.consume_cb_trampoline, &context);
+        });
+        return ret;
     }
 
     /* Helper struct for `consume_callback' with a Queue.
@@ -1157,8 +1161,12 @@ static:
     int consumeCallback(Queue queue, int timeout_ms, ConsumeCb consume_cb)
     {
         auto context = ConsumerQueueCallback(consume_cb);
-        return rd_kafka_consume_callback_queue(queue.queue_, timeout_ms,
+        int ret;
+        mixin(IO!q{
+        ret = rd_kafka_consume_callback_queue(queue.queue_, timeout_ms,
             &ConsumerQueueCallback.consume_cb_trampoline, &context);
+        });
+        return ret;
     }
 
     /**
