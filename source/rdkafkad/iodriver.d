@@ -4,10 +4,9 @@ version(Have_vibe_d)
 {
     enum have_vibed = true;
     import vibe.core.task: Task;
-    import vibe.core.concurrency: receiveCompat;
+    import vibe.core.concurrency: receiveCompat, Isolated;
     import vibe.core.core: runWorkerTaskH;
-    public import vibe.core.concurrency: yield, sendCompat;
-    alias _IODelegate = immutable void delegate() @nogc nothrow;
+    alias _IODelegate = immutable void delegate();
 
     // workaround
     private auto receiveOnlyCompat(ARG)()
@@ -19,7 +18,7 @@ version(Have_vibe_d)
         Unqual!ARG ret;
 
         receiveCompat(
-            (ARG val) { ret = val; },
+            (Isolated!ARG val) { ret = val.extract; },
             (LinkTerminated e) { throw e; },
             (OwnerTerminated e) { throw e; },
             (Variant val) { throw new MessageMismatch(format("Unexpected message type %s, expected %s.", val.type, ARG.stringof)); }
@@ -28,17 +27,37 @@ version(Have_vibe_d)
         return cast(ARG)ret;
     }
 
+    class _IODelegateClass
+    {
+        _IODelegate call;
+
+        this(_IODelegate call) nothrow @nogc pure @safe
+        {
+            this.call = call;
+        }
+
+        void opCall()
+        {
+            call();
+        }
+    }
+
     __gshared Task _io_task;
     enum IO(string code) = "
     {
-        bool done;
+        import vibe.core.sync: TaskCondition, TaskMutex;
+        import vibe.core.concurrency: sendCompat, assumeIsolated;
+        import core.time : msecs;
+        auto condition = new TaskCondition(new TaskMutex);
         _IODelegate _io_delegate_ = ()
             {
                 " ~ code ~ "
-                done = true;
+                condition.notify;
             };
-        sendCompat(_io_task, _io_delegate_);
-        while(!done) yield;
+        sendCompat(_io_task, assumeIsolated(new _IODelegateClass(_io_delegate_)));
+        condition.mutex.lock;
+        condition.wait;
+        condition.mutex.unlock;
     }";
 
     shared static this()
@@ -50,7 +69,7 @@ version(Have_vibe_d)
     {
         for(;;)
         {
-            auto call = receiveOnlyCompat!_IODelegate;
+            auto call = receiveOnlyCompat!_IODelegateClass;
             call();
         }
     }

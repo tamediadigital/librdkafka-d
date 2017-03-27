@@ -11,3 +11,5 @@ dub.selections.json
 *.sublime-project
 
 librdkafka-d-test-library
+
+examples/httplog/httplog
