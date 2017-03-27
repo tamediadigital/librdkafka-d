@@ -80,9 +80,8 @@ abstract class Conf
     }
 
     ///
-    void fromText(Conf conf, string text)
+    void fromText(string text)
     {
-        assert(conf);
         import std.algorithm;
         import std.string;
         import std.format;
@@ -99,7 +98,7 @@ abstract class Conf
                 throw new ConvException(format("failed to parse configuraiton at line %s", i));
             auto key = t[0].stripRight;
             auto value = t[2].stripLeft;
-            conf[key] = value;
+            this[key] = value;
         }
     }
 }
