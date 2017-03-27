@@ -587,7 +587,7 @@ struct Message
      * Note: Requires Apache Kafka broker version >= 0.10.0
      *
      */
-    struct Timestamp
+    static struct Timestamp
     {
         enum Type
         {
