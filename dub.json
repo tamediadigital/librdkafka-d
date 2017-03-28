@@ -3,20 +3,9 @@
 	"authors": [
 		"Ilya Yaroshenko (Converted from the CPP wrapper)"
 	],
-	"dependencies": {"librdkafka": "~>0.3.0"},
-	"configurations": [
-		{
-			"name": "default"
-		},
-		{
-			"name": "vibe.d",
-			"dependencies": {"vibe-d": "~>0.7.30"}
-		},
-		{
-			"name": "vibe-core",
-			"dependencies": {"vibe-core": "~>1.0.0-beta.5"}
-		}
-	],	
+	"dependencies": {
+		"librdkafka": "~>0.3.0"
+	},
 	"description": "OOP wrapper for librdkafka",
 	"copyright": "Copyright © 2016, Tamedia AG",
 	"license": "BSL-1.0"
