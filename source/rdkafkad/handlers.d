@@ -3,6 +3,8 @@ module rdkafkad.handlers;
 import rdkafkad;
 import rdkafkad.iodriver;
 
+import std.datetime: Clock, UTC;
+
 /**
  * Base handle, super class for specific clients.
  */
@@ -1347,10 +1349,32 @@ mixin("nothrow @nogc:");
    *  - _UNKNOWN_TOPIC     - topic is unknown in the Kafka cluster.
    */
     ErrorCode produce(Topic topic, int partition, void[] payload,
-        const(void)[] key = null, int msgflags = MsgOpt.copy, void* msg_opaque = null)
+        const(void)[] key = null,
+        long timestamp = Clock.currTime(UTC()).toUnixTime!long,
+        int msgflags = MsgOpt.copy,
+        void* msg_opaque = null)
     {
         int err;
         mixin(IO!q{
+        //with(rd_kafka_vtype_t)
+        //err = rd_kafka_producev(
+        //        rk_,
+        //        RD_KAFKA_VTYPE_RKT,
+        //        topic.rkt_,
+        //        RD_KAFKA_VTYPE_PARTITION,
+        //        partition,
+        //        RD_KAFKA_VTYPE_MSGFLAGS,
+        //        msgflags,
+        //        RD_KAFKA_VTYPE_VALUE,
+        //        payload.ptr,
+        //        payload.length,
+        //        RD_KAFKA_VTYPE_KEY,
+        //        key.ptr,
+        //        key.length,
+        //        //RD_KAFKA_VTYPE_OPAQUE,
+        //        //msg_opaque,
+        //        RD_KAFKA_VTYPE_END,
+        //        );
         err = rd_kafka_produce(topic.rkt_, partition, msgflags, payload.ptr,
                 payload.length, key.ptr, key.length, msg_opaque);
         });
