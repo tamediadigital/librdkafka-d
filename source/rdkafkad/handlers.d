@@ -549,7 +549,7 @@ mixin("nothrow:");
     }
 
 static if (!have_vibed)
-@nogc:
+mixin("@nogc:");
 
   /**
    * Update the subscription set to \p topics.
@@ -592,9 +592,9 @@ static if (!have_vibed)
         return cast(ErrorCode) err;
     }
     /** Unsubscribe from the current subscription set. */
-    nothrow @nogc ErrorCode unsubscribe()
+    auto unsubscribe()
     {
-        typeof(return) ret;
+        ErrorCode ret;
         mixin(IO!q{
         ret = cast(ErrorCode)(rd_kafka_unsubscribe(this.rk_));
         });
@@ -628,7 +628,7 @@ static if (!have_vibed)
         msg = message to fill. Use `msg.err` to check errors.
         timeout_ms = time to to wait if no incomming msgs in queue.
    +/
-    nothrow @nogc void consume(ref Message msg, int timeout_ms = 10)
+    auto consume(ref Message msg, int timeout_ms = 10)
     {
         rd_kafka_message_t* rkmessage;
 

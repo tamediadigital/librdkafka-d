@@ -3,6 +3,7 @@ import std.file;
 
 import vibe.d;
 import rdkafkad;
+import std.datetime: SysTime;
 
 void main()
 {
@@ -36,6 +37,6 @@ void main()
         with(msg) 
             writefln("Topic %s[%d]->%d, key: %s, timestamp(%s) = %s",
                     topicName, partition, offset, cast(const(char)[])key,
-                    ts.type, ts.timestamp.fromUnixTime);
+                    ts.type, SysTime.fromUnixTime(ts.timestamp, UTC()));
     }
 }
