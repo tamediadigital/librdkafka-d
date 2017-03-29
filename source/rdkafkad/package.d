@@ -54,6 +54,7 @@ public import rdkafkad.config;
 public import rdkafkad.handlers;
 public import rdkafkad.metadata;
 public import rdkafkad.topic;
+import rdkafkad.iodriver;
 
 /**
  * librdkafka version
@@ -107,9 +108,13 @@ const(char)[] getDebugContexts() nothrow @nogc
  * \p wait_destroyed() function can be used for applications where
  * a clean shutdown is required.
  */
-int waitDestroyed(int timeout_ms) nothrow @nogc
+auto waitDestroyed(int timeout_ms)
 {
-    return rd_kafka_wait_destroyed(timeout_ms);
+    int ret;
+    mixin(IO!q{
+    ret = rd_kafka_wait_destroyed(timeout_ms);
+    });
+    return ret;
 }
 
 /**
@@ -582,7 +587,7 @@ struct Message
      * Note: Requires Apache Kafka broker version >= 0.10.0
      *
      */
-    struct Timestamp
+    static struct Timestamp
     {
         enum Type
         {

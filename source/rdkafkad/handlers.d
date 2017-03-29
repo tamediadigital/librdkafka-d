@@ -1,6 +1,9 @@
 ///
 module rdkafkad.handlers;
 import rdkafkad;
+import rdkafkad.iodriver;
+
+import std.datetime: Clock, UTC;
 
 /**
  * Base handle, super class for specific clients.
@@ -16,9 +19,12 @@ class Handle
     * Last assigned member id, or empty string if not currently
     *          a group member.
     */
-    string memberid() const nothrow
+    auto memberid() const
     {
-        char* str = rd_kafka_memberid(rk_);
+        char* str;
+        mixin(IO!q{
+        str = rd_kafka_memberid(rk_);
+        });
         string memberid = str.fromStringz.idup;
         if (str)
             rd_kafka_mem_free(cast(rd_kafka_s*) rk_, str);
@@ -46,14 +52,19 @@ class Handle
 
         rd_kafka_topic_t* topic = only_rkt ? cast(rd_kafka_topic_t*) only_rkt.rkt_ : null;
 
-        if (auto error = cast(ErrorCode)rd_kafka_metadata(rk_, all_topics, topic, &cmetadatap, timeout_ms))
+        ErrorCode error;
+        mixin(IO!q{
+        error = cast(ErrorCode)rd_kafka_metadata(rk_, all_topics, topic, &cmetadatap, timeout_ms); 
+        });
+        if (error)
         {
             throw new Exception(error.err2str);
         }
         return new Metadata(cmetadatap);
     }
 
-nothrow @nogc:
+static if (!have_vibed)
+mixin("@nogc nothrow:");
 
     package void setCommonConfig(GlobalConf conf)
     {
@@ -104,11 +115,15 @@ nothrow @nogc:
     *
     * ErrorCode.no_error on success or an error code on failure.
     */
-    ErrorCode queryWatermarkOffsets(const(char)* topic, int partition,
+    auto queryWatermarkOffsets(const(char)* topic, int partition,
         ref long low, ref long high, int timeout_ms)
     {
-        return cast(ErrorCode) rd_kafka_query_watermark_offsets(rk_, topic,
+        ErrorCode ret;
+        mixin(IO!q{
+        ret = cast(ErrorCode) rd_kafka_query_watermark_offsets(rk_, topic,
             partition, &low, &high, timeout_ms);
+        });
+        return ret;
     }
 
     package rd_kafka_t* rk_;
@@ -155,7 +170,20 @@ nothrow @nogc:
     */
     int poll(int timeout_ms = 10)
     {
-        return rd_kafka_poll(rk_, timeout_ms);
+        typeof(return) ret;
+        static if (have_vibed == true)
+        {
+            import vibe.core.core: sleep;
+            import core.time: msecs;
+            ret = rd_kafka_poll(rk_, 0);
+            if (ret == 0 && timeout_ms)
+                sleep(timeout_ms.msecs);
+        }
+        else
+        {
+            ret = rd_kafka_poll(rk_, timeout_ms);
+        }
+        return ret;
     }
 
     /**
@@ -166,13 +194,17 @@ nothrow @nogc:
     */
     int outqLen()
     {
-        return rd_kafka_outq_len(rk_);
+        typeof(return) ret;
+        mixin(IO!q{
+        ret = rd_kafka_outq_len(rk_);
+        });
+        return ret;
     }
 
     /**
      * Convert a list of C partitions to C++ partitions
      */
-    private static TopicPartition[] c_parts_to_partitions(
+    nothrow @nogc private static TopicPartition[] c_parts_to_partitions(
         const rd_kafka_topic_partition_list_t* c_parts)
     {
         auto partitions = (cast(TopicPartition*) malloc(c_parts.cnt * TopicPartition.sizeof))[0
@@ -182,7 +214,7 @@ nothrow @nogc:
         return partitions;
     }
 
-    static void free_partition_vector(ref TopicPartition[] v)
+    nothrow @nogc static void free_partition_vector(ref TopicPartition[] v)
     {
         foreach (ref p; v)
             p.destroy;
@@ -190,7 +222,7 @@ nothrow @nogc:
         v = null;
     }
 
-    private static rd_kafka_topic_partition_list_t* partitions_to_c_parts(const TopicPartition[] partitions)
+    nothrow @nogc private static rd_kafka_topic_partition_list_t* partitions_to_c_parts(const TopicPartition[] partitions)
     {
         rd_kafka_topic_partition_list_t* c_parts = rd_kafka_topic_partition_list_new(cast(int) partitions.length);
 
@@ -206,7 +238,7 @@ nothrow @nogc:
     /**
      * @brief Update the application provided 'partitions' with info from 'c_parts'
      */
-    private static void update_partitions_from_c_parts(TopicPartition[] partitions,
+    nothrow @nogc private static void update_partitions_from_c_parts(TopicPartition[] partitions,
         const rd_kafka_topic_partition_list_t* c_parts)
     {
         foreach (i; 0 .. c_parts.cnt)
@@ -225,7 +257,7 @@ nothrow @nogc:
         }
     }
 
-    private static void log_cb_trampoline(const rd_kafka_t* rk, int level,
+    nothrow @nogc private static void log_cb_trampoline(const rd_kafka_t* rk, int level,
         const(char)* fac, const(char)* buf)
     {
         if (!rk)
@@ -249,7 +281,7 @@ nothrow @nogc:
         handle.event_cb_(event);
     }
 
-    private static void error_cb_trampoline(rd_kafka_t* rk, int err,
+    nothrow @nogc private static void error_cb_trampoline(rd_kafka_t* rk, int err,
         const(char)* reason, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
@@ -260,7 +292,7 @@ nothrow @nogc:
         handle.event_cb_(event);
     }
 
-    private static void throttle_cb_trampoline(rd_kafka_t* rk,
+    nothrow @nogc private static void throttle_cb_trampoline(rd_kafka_t* rk,
         const(char)* broker_name, int broker_id, int throttle_time_ms, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
@@ -273,7 +305,7 @@ nothrow @nogc:
         handle.event_cb_(event);
     }
 
-    private static int stats_cb_trampoline(rd_kafka_t* rk, char* json,
+    nothrow @nogc private static int stats_cb_trampoline(rd_kafka_t* rk, char* json,
         size_t json_len, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
@@ -285,14 +317,14 @@ nothrow @nogc:
         return 0;
     }
 
-    private static int socket_cb_trampoline(int domain, int type, int protocol, void* opaque)
+    nothrow @nogc private static int socket_cb_trampoline(int domain, int type, int protocol, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
 
         return handle.socket_cb_(domain, type, protocol);
     }
 
-    private static int open_cb_trampoline(const(char)* pathname, int flags,
+    nothrow @nogc private static int open_cb_trampoline(const(char)* pathname, int flags,
         mode_t mode, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
@@ -300,7 +332,7 @@ nothrow @nogc:
         return handle.open_cb_(pathname.fromStringz, flags, cast(int)(mode));
     }
 
-    private static void rebalance_cb_trampoline(rd_kafka_t* rk,
+    nothrow @nogc private static void rebalance_cb_trampoline(rd_kafka_t* rk,
         rd_kafka_resp_err_t err, rd_kafka_topic_partition_list_t* c_partitions, void* opaque)
     {
         auto handle = cast(KafkaConsumer)(opaque);
@@ -311,7 +343,7 @@ nothrow @nogc:
         free_partition_vector(partitions);
     }
 
-    private static void offset_commit_cb_trampoline(rd_kafka_t* rk,
+    nothrow @nogc private static void offset_commit_cb_trampoline(rd_kafka_t* rk,
         rd_kafka_resp_err_t err, rd_kafka_topic_partition_list_t* c_offsets, void* opaque)
     {
         Handle handle = cast(Handle)(opaque);
@@ -491,14 +523,20 @@ class KafkaConsumer : Handle
         rd_kafka_poll_set_consumer(rk);
     }
 
+static if (!have_vibed)
+mixin("nothrow:");
+
     /** Returns the current partition assignment as set by
      *  assign() */
-    ErrorCode assignment(ref TopicPartition[] partitions) nothrow
+    ErrorCode assignment(ref TopicPartition[] partitions) 
     {
         rd_kafka_topic_partition_list_t* c_parts;
         rd_kafka_resp_err_t err;
 
-        if (0 != (err = rd_kafka_assignment(rk_, &c_parts)))
+        mixin(IO!q{
+        err = rd_kafka_assignment(rk_, &c_parts);
+        });
+        if (err)
             return cast(ErrorCode) err;
 
         partitions.length = c_parts.cnt;
@@ -512,7 +550,8 @@ class KafkaConsumer : Handle
 
     }
 
-nothrow @nogc:
+static if (!have_vibed)
+mixin("@nogc:");
 
   /**
    * Update the subscription set to \p topics.
@@ -546,16 +585,22 @@ nothrow @nogc:
         foreach (t; topics)
             rd_kafka_topic_partition_list_add(c_topics, t, RD_KAFKA_PARTITION_UA);
 
+        mixin(IO!q{
         err = rd_kafka_subscribe(rk_, c_topics);
+        });
 
         rd_kafka_topic_partition_list_destroy(c_topics);
 
         return cast(ErrorCode) err;
     }
     /** Unsubscribe from the current subscription set. */
-    nothrow @nogc ErrorCode unsubscribe()
+    auto unsubscribe()
     {
-        return cast(ErrorCode)(rd_kafka_unsubscribe(this.rk_));
+        ErrorCode ret;
+        mixin(IO!q{
+        ret = cast(ErrorCode)(rd_kafka_unsubscribe(this.rk_));
+        });
+        return ret;
     }
 
     /**
@@ -585,11 +630,13 @@ nothrow @nogc:
         msg = message to fill. Use `msg.err` to check errors.
         timeout_ms = time to to wait if no incomming msgs in queue.
    +/
-    nothrow @nogc void consume(ref Message msg, int timeout_ms = 10)
+    auto consume(ref Message msg, int timeout_ms = 10)
     {
         rd_kafka_message_t* rkmessage;
 
+        mixin(IO!q{
         rkmessage = rd_kafka_consumer_poll(this.rk_, timeout_ms);
+        });
 
         if (!rkmessage)
         {
@@ -613,7 +660,9 @@ nothrow @nogc:
 
         c_parts = partitions_to_c_parts(partitions);
 
+        mixin(IO!q{
         err = rd_kafka_assign(rk_, c_parts);
+        });
 
         rd_kafka_topic_partition_list_destroy(c_parts);
         return cast(ErrorCode) err;
@@ -624,7 +673,11 @@ nothrow @nogc:
    */
     ErrorCode unassign()
     {
-        return cast(ErrorCode) rd_kafka_assign(rk_, null);
+        typeof(return) ret;
+        mixin(IO!q{
+        ret = cast(ErrorCode) rd_kafka_assign(rk_, null);
+        });
+        return ret;
     }
 
     /**
@@ -641,8 +694,11 @@ nothrow @nogc:
    */
     ErrorCode commitSync()
     {
-        return cast(ErrorCode) rd_kafka_commit(rk_, null, 0 /*sync*/ );
-
+        typeof(return) ret;
+        mixin(IO!q{
+        ret = cast(ErrorCode) rd_kafka_commit(rk_, null, 0 /*sync*/ );
+        });
+        return ret;
     }
 
     /**
@@ -652,7 +708,11 @@ nothrow @nogc:
    */
     ErrorCode commitAsync()
     {
-        return cast(ErrorCode) rd_kafka_commit(rk_, null, 1 /*async*/ );
+        typeof(return) ret;
+        mixin(IO!q{
+        ret = cast(ErrorCode) rd_kafka_commit(rk_, null, 1 /*async*/ );
+        });
+        return ret;
     }
 
     /**
@@ -664,7 +724,11 @@ nothrow @nogc:
    */
     ErrorCode commitSync(ref Message message)
     {
-        return cast(ErrorCode) rd_kafka_commit_message(rk_, message.rkmessage_, 0 /*sync*/ );
+        typeof(return) ret;
+        mixin(IO!q{
+        ret = cast(ErrorCode) rd_kafka_commit_message(rk_, message.rkmessage_, 0 /*sync*/ );
+        });
+        return ret;
     }
 
     /**
@@ -676,7 +740,11 @@ nothrow @nogc:
    */
     ErrorCode commitAsync(ref Message message)
     {
-        return cast(ErrorCode) rd_kafka_commit_message(rk_, message.rkmessage_, 1 /*async*/ );
+        typeof(return) ret;
+        mixin(IO!q{
+        ret = cast(ErrorCode) rd_kafka_commit_message(rk_, message.rkmessage_, 1 /*async*/ );
+        });
+        return ret;
     }
 
     /**
@@ -687,7 +755,10 @@ nothrow @nogc:
     ErrorCode commitSync(TopicPartition[] offsets)
     {
         rd_kafka_topic_partition_list_t* c_parts = partitions_to_c_parts(offsets);
-        rd_kafka_resp_err_t err = rd_kafka_commit(rk_, c_parts, 0);
+        rd_kafka_resp_err_t err;
+        mixin(IO!q{
+        err = rd_kafka_commit(rk_, c_parts, 0);
+        });
         if (!err)
             update_partitions_from_c_parts(offsets, c_parts);
         rd_kafka_topic_partition_list_destroy(c_parts);
@@ -702,7 +773,10 @@ nothrow @nogc:
     ErrorCode commitAsync(const TopicPartition[] offsets)
     {
         rd_kafka_topic_partition_list_t* c_parts = partitions_to_c_parts(offsets);
-        rd_kafka_resp_err_t err = rd_kafka_commit(rk_, c_parts, 1);
+        rd_kafka_resp_err_t err;
+        mixin(IO!q{
+        err = rd_kafka_commit(rk_, c_parts, 1);
+        });
         rd_kafka_topic_partition_list_destroy(c_parts);
         return cast(ErrorCode) err;
     }
@@ -722,7 +796,9 @@ nothrow @nogc:
 
         c_parts = partitions_to_c_parts(partitions);
 
+        mixin(IO!q{
         err = rd_kafka_committed(rk_, c_parts, timeout_ms);
+        });
 
         if (!err)
         {
@@ -749,7 +825,9 @@ nothrow @nogc:
 
         c_parts = partitions_to_c_parts(partitions);
 
+        mixin(IO!q{
         err = rd_kafka_position(rk_, c_parts);
+        });
 
         if (!err)
         {
@@ -781,13 +859,17 @@ nothrow @nogc:
     ErrorCode close()
     {
         rd_kafka_resp_err_t err;
+        mixin(IO!q{
         err = rd_kafka_consumer_close(rk_);
+        });
         if (err)
             return cast(ErrorCode) err;
 
+        mixin(IO!q{
         while (rd_kafka_outq_len(rk_) > 0)
             rd_kafka_poll(rk_, 10);
         rd_kafka_destroy(rk_);
+        });
 
         return cast(ErrorCode) err;
     }
@@ -827,18 +909,24 @@ class Consumer : Handle
             rk_conf = rd_kafka_conf_dup(conf.rk_conf_);
         }
 
-        if (null is(rk_ = rd_kafka_new(rd_kafka_type_t.RD_KAFKA_CONSUMER,
-                rk_conf, errbuf.ptr, errbuf.sizeof)))
+        mixin(IO!q{
+        rk_ = rd_kafka_new(rd_kafka_type_t.RD_KAFKA_CONSUMER,
+                rk_conf, errbuf.ptr, errbuf.sizeof);
+        });
+        if (null is rk_)
         {
             throw new Exception(errbuf.ptr.fromStringz.idup);
         }
     }
 
-nothrow @nogc:
+static if (!have_vibed)
+mixin("nothrow @nogc:");
 
      ~this()
     {
+        mixin(IO!q{
         rd_kafka_destroy(rk_);
+        });
     }
 
 static:
@@ -864,7 +952,11 @@ static:
    */
     ErrorCode start(Topic topic, int partition, long offset, Queue queue)
     {
-        if (rd_kafka_consume_start(topic.rkt_, partition, offset) == -1)
+        int err;
+        mixin(IO!q{
+        err = rd_kafka_consume_start(topic.rkt_, partition, offset);
+        });
+        if (err == -1)
             return cast(ErrorCode)(rd_kafka_errno2err(errno));
         return ErrorCode.no_error;
     }
@@ -880,7 +972,11 @@ static:
    */
     ErrorCode stop(Topic topic, int partition)
     {
-        if (rd_kafka_consume_stop(topic.rkt_, partition) == -1)
+        int err;
+        mixin(IO!q{
+        err = rd_kafka_consume_stop(topic.rkt_, partition);
+        });
+        if (err == -1)
             return cast(ErrorCode)(rd_kafka_errno2err(errno));
         return ErrorCode.no_error;
     }
@@ -901,7 +997,11 @@ static:
    */
     ErrorCode seek(Topic topic, int partition, long offset, int timeout_ms)
     {
-        if (rd_kafka_seek(topic.rkt_, partition, offset, timeout_ms) == -1)
+        int err;
+        mixin(IO!q{
+        err = rd_kafka_seek(topic.rkt_, partition, offset, timeout_ms);
+        });
+        if (err == -1)
             return cast(ErrorCode)(rd_kafka_errno2err(errno));
         return ErrorCode.no_error;
     }
@@ -927,7 +1027,9 @@ static:
     {
         rd_kafka_message_t* rkmessage;
 
+        mixin(IO!q{
         rkmessage = rd_kafka_consume(topic.rkt_, partition, timeout_ms);
+        });
         if (!rkmessage)
             msg = Message(topic, cast(ErrorCode) rd_kafka_errno2err(errno));
 
@@ -958,7 +1060,9 @@ static:
     void consume(Queue queue, int timeout_ms, ref Message msg)
     {
         rd_kafka_message_t* rkmessage;
+        mixin(IO!q{
         rkmessage = rd_kafka_consume_queue(queue.queue_, timeout_ms);
+        });
         if (!rkmessage)
             msg = Message(null, cast(ErrorCode) rd_kafka_errno2err(errno));
         /*
@@ -1014,8 +1118,12 @@ static:
     int consumeCallback(Topic topic, int partition, int timeout_ms, ConsumeCb consume_cb)
     {
         auto context = ConsumerCallback(topic, consume_cb);
-        return rd_kafka_consume_callback(topic.rkt_, partition, timeout_ms,
+        int ret;
+        mixin(IO!q{
+        ret = rd_kafka_consume_callback(topic.rkt_, partition, timeout_ms,
             &ConsumerCallback.consume_cb_trampoline, &context);
+        });
+        return ret;
     }
 
     /* Helper struct for `consume_callback' with a Queue.
@@ -1054,8 +1162,12 @@ static:
     int consumeCallback(Queue queue, int timeout_ms, ConsumeCb consume_cb)
     {
         auto context = ConsumerQueueCallback(consume_cb);
-        return rd_kafka_consume_callback_queue(queue.queue_, timeout_ms,
+        int ret;
+        mixin(IO!q{
+        ret = rd_kafka_consume_callback_queue(queue.queue_, timeout_ms,
             &ConsumerQueueCallback.consume_cb_trampoline, &context);
+        });
+        return ret;
     }
 
     /**
@@ -1131,13 +1243,16 @@ class Producer : Handle
         return new Topic(this, topic, topicConf);
     }
 
-nothrow @nogc:
+static if (!have_vibed)
+mixin("nothrow @nogc:");
 
      ~this()
     {
         if (rk_)
         {
+            mixin(IO!q{
             rd_kafka_destroy(rk_);
+            });
         }
     }
 
@@ -1170,7 +1285,7 @@ nothrow @nogc:
               */
    }
 
-    private static void dr_msg_cb_trampoline(rd_kafka_t* rk,
+    nothrow @nogc private static void dr_msg_cb_trampoline(rd_kafka_t* rk,
         const rd_kafka_message_t* rkmessage, void* opaque)
     {
         auto handle = cast(Handle) opaque;
@@ -1234,10 +1349,36 @@ nothrow @nogc:
    *  - _UNKNOWN_TOPIC     - topic is unknown in the Kafka cluster.
    */
     ErrorCode produce(Topic topic, int partition, void[] payload,
-        const(void)[] key = null, int msgflags = MsgOpt.copy, void* msg_opaque = null)
+        const(void)[] key = null,
+        long timestamp = Clock.currTime(UTC()).toUnixTime!long,
+        int msgflags = MsgOpt.copy,
+        void* msg_opaque = null)
     {
-        if (rd_kafka_produce(topic.rkt_, partition, msgflags, payload.ptr,
-                payload.length, key.ptr, key.length, msg_opaque) == -1)
+        int err;
+        mixin(IO!q{
+        //with(rd_kafka_vtype_t)
+        //err = rd_kafka_producev(
+        //        rk_,
+        //        RD_KAFKA_VTYPE_RKT,
+        //        topic.rkt_,
+        //        RD_KAFKA_VTYPE_PARTITION,
+        //        partition,
+        //        RD_KAFKA_VTYPE_MSGFLAGS,
+        //        msgflags,
+        //        RD_KAFKA_VTYPE_VALUE,
+        //        payload.ptr,
+        //        payload.length,
+        //        RD_KAFKA_VTYPE_KEY,
+        //        key.ptr,
+        //        key.length,
+        //        //RD_KAFKA_VTYPE_OPAQUE,
+        //        //msg_opaque,
+        //        RD_KAFKA_VTYPE_END,
+        //        );
+        err = rd_kafka_produce(topic.rkt_, partition, msgflags, payload.ptr,
+                payload.length, key.ptr, key.length, msg_opaque);
+        });
+        if (err == -1)
             return cast(ErrorCode) rd_kafka_errno2err(errno);
         return ErrorCode.no_error;
     }
@@ -1255,6 +1396,10 @@ nothrow @nogc:
    */
     ErrorCode flush(int timeout_ms = 60_000)
     {
-        return cast(ErrorCode) rd_kafka_flush(rk_, timeout_ms);
+        typeof(return) ret;
+        mixin(IO!q{
+        ret = cast(ErrorCode) rd_kafka_flush(rk_, timeout_ms);
+        });
+        return ret;
     }
 }

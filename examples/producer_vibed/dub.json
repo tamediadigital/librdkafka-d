@@ -1,0 +1,13 @@
+{
+	"name": "producer_vibed",
+	"authors": [
+		"Ilya Yaroshenko"
+	],
+	"description": "Producer example",
+	"copyright": "Copyright © 2016, Tamedia AG",
+	"license": "BSL-1.0",
+	"dependencies":{
+		"vibe-d": "~>0.7.30",
+		"librdkafka-d": {"path" : "../../"},
+	}
+}

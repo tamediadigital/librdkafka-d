@@ -1,6 +1,7 @@
 ///
 module rdkafkad.topic;
 import rdkafkad;
+import rdkafkad.iodriver;
 
 /**
  * Topic+Partition
@@ -25,13 +26,22 @@ struct TopicPartition
         sink.formattedWrite("[%s]", partition_);
     }
 
-nothrow @nogc:
-
-    /**
+   /**
    * Create topic+partition object for \p topic and \p partition.
    *
    * Use \c delete to deconstruct.
    */
+
+    nothrow:
+
+    /// ditto
+    this(const(char)[] topic, int partition)
+    {
+        this(topic.toStringz, partition);
+    }
+
+    @nogc:
+
     this(const(char)* topic, int partition)
     {
         topic_ = topic;
@@ -39,6 +49,7 @@ nothrow @nogc:
         offset_ = Offset.invalid;
         err_ = ErrorCode.no_error;
     }
+
 
     package this(const rd_kafka_topic_partition_t* c_part)
     {
@@ -131,7 +142,10 @@ class Topic
                 this.partitioner_kp_cb_ = conf.partitioner_kp_cb_;
             }
         }
-        rkt_ = rd_kafka_topic_new(base.rk_, topic_str.toStringz(), rkt_conf);
+        auto str0 = topic_str.toStringz();
+        mixin(IO!q{
+        rkt_ = rd_kafka_topic_new(base.rk_, str0, rkt_conf);
+        });
         if (!rkt_)
         {
             auto msg = err2str(cast(ErrorCode)rd_kafka_errno2err(errno));
@@ -140,12 +154,17 @@ class Topic
         }
     }
 
-nothrow @nogc:
+static if(have_vibed)
+mixin("nothrow @nogc:");
 
      ~this()
     {
         if (rkt_)
+        {
+            mixin(IO!q{
             rd_kafka_topic_destroy(rkt_);
+            });
+        }
     }
 
     package rd_kafka_topic_t* rkt_;
@@ -190,7 +209,11 @@ nothrow @nogc:
    */
     final bool partitionAvailable(int partition) const
     {
-        return cast(bool) rd_kafka_topic_partition_available(rkt_, partition);
+        typeof(return) ret;
+        mixin(IO!q{
+        ret = cast(bool) rd_kafka_topic_partition_available(rkt_, partition);
+        });
+        return ret;
     }
 
     /**
@@ -206,6 +229,10 @@ nothrow @nogc:
    */
     final ErrorCode offsetStore(int partition, long offset)
     {
-        return cast(ErrorCode) rd_kafka_offset_store(rkt_, partition, offset);
+        typeof(return) ret;
+        mixin(IO!q{
+        ret = cast(ErrorCode) rd_kafka_offset_store(rkt_, partition, offset);
+        });
+        return ret;
     }
 }

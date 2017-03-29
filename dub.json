@@ -3,7 +3,9 @@
 	"authors": [
 		"Ilya Yaroshenko (Converted from the CPP wrapper)"
 	],
-	"dependencies": {"librdkafka": "~>0.3.0"},
+	"dependencies": {
+		"librdkafka": "~>0.3.1"
+	},
 	"description": "OOP wrapper for librdkafka",
 	"copyright": "Copyright © 2016, Tamedia AG",
 	"license": "BSL-1.0"

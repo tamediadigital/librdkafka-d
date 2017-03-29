@@ -1,6 +1,7 @@
 ///
 module rdkafkad.config;
 import rdkafkad;
+import rdkafkad.iodriver;
 
 /**
  * \b Portability: OpenCb callback class
@@ -51,7 +52,7 @@ class ConfException : Exception
  *
  * See_also: CONFIGURATION.md for the full list of supported properties.
  */
-interface Conf
+abstract class Conf
 {
     /**
      * Set configuration property \p name to value \p value.
@@ -65,9 +66,45 @@ interface Conf
    *           returns the value in \p value. */
     string opIndex(in char[] name) const;
 
-    string[] dump();
+    ///
+    string[string] dump();
+
+    private static string[string] dumpImpl(const (char)** arrc, size_t cnt)
+    {
+        assert(cnt % 2 == 0);
+        string[string] aa;
+        foreach (size_t i; 0 .. cnt / 2)
+            aa[arrc[i * 2].fromStringz.idup] = arrc[i * 2 + 1].fromStringz.idup;
+        rd_kafka_conf_dump_free(arrc, cnt);
+        return aa;
+    }
+
+    ///
+    void fromText(string text)
+    {
+        import std.algorithm;
+        import std.string;
+        import std.format;
+        import std.conv: ConvException;
+        size_t i;
+        foreach(line; text.lineSplitter)
+        {
+            i++;
+            line = line.findSplit("#")[0].strip;
+            if (line.empty)
+                continue;
+            auto t = line.findSplit("=");
+            if (t[1].empty)
+                throw new ConvException(format("failed to parse configuraiton at line %s", i));
+            auto key = t[0].stripRight;
+            auto value = t[2].stripLeft;
+            this[key] = value;
+        }
+    }
 }
 
+
+///
 class GlobalConf : Conf
 {
     ///
@@ -81,15 +118,11 @@ class GlobalConf : Conf
 
     /** Dump configuration names and values to list containing
    *         name,value tuples */
-    string[] dump()
+    override string[string] dump()
     {
         size_t cnt;
         auto arrc = rd_kafka_conf_dump(rk_conf_, &cnt);
-        auto arr = new string[cnt];
-        foreach (size_t i; 0 .. cnt)
-            arr[i] = arrc[i].fromStringz.idup;
-        rd_kafka_conf_dump_free(arrc, cnt);
-        return arr;
+        return dumpImpl(arrc, cnt);
     }
 
     /**
@@ -97,7 +130,7 @@ class GlobalConf : Conf
      * OK on success, else writes a human readable error
      *          description to \p errstr on error.
      */
-    void opIndexAssign(in char[] value, in char[] name)
+    override void opIndexAssign(in char[] value, in char[] name)
     {
         char[512] errbuf = void;
 
@@ -111,7 +144,7 @@ class GlobalConf : Conf
     /** Query single configuration value
     *  OK if the property was set previously set and
     *           returns the value in \p value. */
-    string opIndex(in char[] name) const
+    override string opIndex(in char[] name) const
     {
         size_t size;
 
@@ -209,7 +242,7 @@ class TopicConf : Conf
      * OK on success, else writes a human readable error
      *          description to \p errstr on error.
      */
-    void opIndexAssign(in char[] value, in char[] name)
+    override void opIndexAssign(in char[] value, in char[] name)
     {
         rd_kafka_conf_res_t res;
         char[512] errbuf = void;
@@ -225,7 +258,7 @@ class TopicConf : Conf
     /** Query single configuration value
    *  OK if the property was set previously set and
    *           returns the value in \p value. */
-    string opIndex(in char[] name) const
+    override string opIndex(in char[] name) const
     {
         size_t size;
         rd_kafka_conf_res_t res = rd_kafka_conf_res_t.RD_KAFKA_CONF_OK;
@@ -241,15 +274,11 @@ class TopicConf : Conf
 
     /** Dump configuration names and values to list containing
      *         name,value tuples */
-    string[] dump()
+    override string[string] dump()
     {
         size_t cnt;
         auto arrc = rd_kafka_topic_conf_dump(rkt_conf_, &cnt);
-        auto arr = new string[cnt];
-        foreach (size_t i; 0 .. cnt)
-            arr[i] = arrc[i].fromStringz.idup;
-        rd_kafka_conf_dump_free(arrc, cnt);
-        return arr;
+        return dumpImpl(arrc, cnt);
     }
 
 nothrow @nogc:

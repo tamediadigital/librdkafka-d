@@ -9,3 +9,7 @@ dub.selections.json
 *.a
 
 *.sublime-project
+
+librdkafka-d-test-library
+
+examples/httplog/httplog
