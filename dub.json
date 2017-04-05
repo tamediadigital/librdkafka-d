@@ -1,12 +1,26 @@
 {
-	"name": "librdkafka-d",
 	"authors": [
 		"Ilya Yaroshenko (Converted from the CPP wrapper)"
 	],
+	"configurations": [
+		{
+			"name": "library",
+			"targetType": "library"
+		},
+		{
+			"name": "vibe-d",
+			"targetType": "library",
+			"dependencies": {
+				"vibe-d": "~>0.7.30"
+			}
+		}
+	],
+	"name": "librdkafka-d",
+	"version": "0.2.0",
+	"license": "BSL-1.0",
+	"copyright": "Copyright © 2016, Tamedia AG",
+	"description": "OOP wrapper for librdkafka",
 	"dependencies": {
 		"librdkafka": "~>0.3.1"
-	},
-	"description": "OOP wrapper for librdkafka",
-	"copyright": "Copyright © 2016, Tamedia AG",
-	"license": "BSL-1.0"
+	}
 }

@@ -13,3 +13,7 @@ dub.selections.json
 librdkafka-d-test-library
 
 examples/httplog/httplog
+
+examples/producer/producer
+
+librdkafka-d-test-default
