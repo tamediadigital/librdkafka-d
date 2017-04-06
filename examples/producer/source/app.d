@@ -1,9 +1,9 @@
 import std.stdio;
 import std.exception;
 import std.algorithm;
+import std.datetime;
 import rdkafkad;
 import core.thread;
-import core.time;
 
 __gshared continuePoll = true;
 
@@ -16,7 +16,6 @@ void main()
     try
     {
         conf["metadata.broker.list"] = "localhost";
-        conf["group.id"] = "rdkafkad";
         producer = new Producer(conf);
     }
     catch(Exception e)
@@ -25,15 +24,16 @@ void main()
         return;
     }
     auto topics = [
-        producer.newTopic("httplog_topic"),
+        producer.newTopic("httplog_topic3"),
     ];
+    auto time = Clock.currTime(UTC());
     /// @@@@@ Main loop :-)
     auto handler = new Thread({ while(continuePoll) producer.poll(10);}).start;
     for (size_t c;;) foreach(topic; topics)
     {
         import std.format;
         string key = "myKey";
-        string payload = format("myValue %d", c++); // use large payload for I/O benchmarks
+        string payload = format(`{"ts":%s, "myValue":%d}`, (time + minutes(c)).toUnixTime, c++); // use large payload for I/O benchmarks
         if(auto error = producer.produce(topic, Topic.unassignedPartition, cast(void[])payload, cast(const(void)[])key))
         {
             if(error == ErrorCode.queue_full)
