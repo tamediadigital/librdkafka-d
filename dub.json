@@ -16,7 +16,6 @@
 		}
 	],
 	"name": "librdkafka-d",
-	"version": "0.2.0",
 	"license": "BSL-1.0",
 	"copyright": "Copyright © 2016, Tamedia AG",
 	"description": "OOP wrapper for librdkafka",
