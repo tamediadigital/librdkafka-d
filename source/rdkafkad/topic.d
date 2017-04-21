@@ -1,7 +1,6 @@
 ///
 module rdkafkad.topic;
 import rdkafkad;
-import rdkafkad.iodriver;
 
 /**
  * Topic+Partition
@@ -143,9 +142,7 @@ class Topic
             }
         }
         auto str0 = topic_str.toStringz();
-        mixin(IO!q{
         rkt_ = rd_kafka_topic_new(base.rk_, str0, rkt_conf);
-        });
         if (!rkt_)
         {
             auto msg = err2str(cast(ErrorCode)rd_kafka_errno2err(errno));
@@ -154,16 +151,13 @@ class Topic
         }
     }
 
-static if(have_vibed)
-mixin("nothrow @nogc:");
+nothrow @nogc:
 
      ~this()
     {
         if (rkt_)
         {
-            mixin(IO!q{
             rd_kafka_topic_destroy(rkt_);
-            });
         }
     }
 
@@ -210,9 +204,7 @@ mixin("nothrow @nogc:");
     final bool partitionAvailable(int partition) const
     {
         typeof(return) ret;
-        mixin(IO!q{
         ret = cast(bool) rd_kafka_topic_partition_available(rkt_, partition);
-        });
         return ret;
     }
 
@@ -230,9 +222,7 @@ mixin("nothrow @nogc:");
     final ErrorCode offsetStore(int partition, long offset)
     {
         typeof(return) ret;
-        mixin(IO!q{
         ret = cast(ErrorCode) rd_kafka_offset_store(rkt_, partition, offset);
-        });
         return ret;
     }
 }

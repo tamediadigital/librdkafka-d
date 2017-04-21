@@ -2,19 +2,6 @@
 	"authors": [
 		"Ilya Yaroshenko (Converted from the CPP wrapper)"
 	],
-	"configurations": [
-		{
-			"name": "library",
-			"targetType": "library"
-		},
-		{
-			"name": "vibe-d",
-			"targetType": "library",
-			"dependencies": {
-				"vibe-d": "~>0.7.30"
-			}
-		}
-	],
 	"name": "librdkafka-d",
 	"version": "0.2.0",
 	"license": "BSL-1.0",
