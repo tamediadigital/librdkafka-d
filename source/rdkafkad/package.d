@@ -51,7 +51,10 @@ package import core.sys.posix.sys.types;
 package import deimos.rdkafka;
 
 public import rdkafkad.config;
-public import rdkafkad.handlers;
+public import rdkafkad.handler;
+public import rdkafkad.handler.simple_consumer;
+public import rdkafkad.handler.kafka_consumer;
+public import rdkafkad.handler.producer;
 public import rdkafkad.metadata;
 public import rdkafkad.topic;
 
