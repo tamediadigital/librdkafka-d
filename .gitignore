@@ -17,3 +17,7 @@ examples/httplog/httplog
 examples/producer/producer
 
 librdkafka-d-test-default
+
+untitled.sublime-workspace
+
+examples/producer_vibed/producer_vibed

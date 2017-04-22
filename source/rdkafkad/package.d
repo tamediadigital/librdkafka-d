@@ -54,7 +54,6 @@ public import rdkafkad.config;
 public import rdkafkad.handlers;
 public import rdkafkad.metadata;
 public import rdkafkad.topic;
-import rdkafkad.iodriver;
 
 /**
  * librdkafka version
@@ -111,9 +110,7 @@ const(char)[] getDebugContexts() nothrow @nogc
 auto waitDestroyed(int timeout_ms)
 {
     int ret;
-    mixin(IO!q{
     ret = rd_kafka_wait_destroyed(timeout_ms);
-    });
     return ret;
 }
 

@@ -1,7 +1,6 @@
 ///
 module rdkafkad.metadata;
 import rdkafkad;
-import rdkafkad.iodriver;
 
 /**
  * Metadata: Broker information
