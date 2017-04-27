@@ -60,7 +60,7 @@ void main()
                 }
                 else if (msg.err == ErrorCode.partition_eof)
                 {
-                    exitEventLoop;
+                    exitEventLoop(true);
                     break;
                 }
                 else
