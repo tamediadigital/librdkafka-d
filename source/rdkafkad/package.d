@@ -603,6 +603,12 @@ struct Message
 
     @disable this(this);
 nothrow @nogc:
+
+    bool isNull() @safe pure
+    {
+        return rkmessage_ is null;
+    }
+
      ~this()
     {
         if (free_rkmessage_ && rkmessage_)
@@ -618,16 +624,18 @@ nothrow @nogc:
 
     this(Topic topic, const rd_kafka_message_t* rkmessage)
     {
+        assert(rkmessage);
         topic_ = topic;
         rkmessage_ = rkmessage;
+        err_ = cast(ErrorCode) rkmessage.err;
     }
 
     this(rd_kafka_message_t* rkmessage)
     {
-
+        assert(rkmessage);
         rkmessage_ = rkmessage;
         free_rkmessage_ = true;
-
+        err_ = cast(ErrorCode) rkmessage.err;
         if (rkmessage.rkt)
         {
             /* Possibly null */
@@ -639,9 +647,7 @@ nothrow @nogc:
     this(Topic topic, ErrorCode err)
     {
         topic_ = topic;
-        rkmessage_ = &rkmessage_err_;
-        memset(&rkmessage_err_, 0, rkmessage_err_.sizeof);
-        rkmessage_err_.err = cast(rd_kafka_resp_err_t)(err);
+        err_ = err;
     }
 
     /** The error string if object represent an error event,
@@ -653,13 +659,13 @@ nothrow @nogc:
      *        and we cant distinguish between consumer and producer.
      *        For the producer case the payload needs to be the original
      *        payload pointer. */
-        return err2str(cast(ErrorCode)rkmessage_.err);
+        return err2str(err_);
     }
 
     /** The error code if object represents an error event, else 0. */
     ErrorCode err() const
     {
-        return cast(ErrorCode) rkmessage_.err;
+        return err_;
     }
 
     /** the Topic object for a message (if applicable),
@@ -721,7 +727,5 @@ package:
     Topic topic_;
     const (rd_kafka_message_t)* rkmessage_;
     bool free_rkmessage_;
-    /* For error signalling by the C++ layer the .._err_ message is
-   * used as a place holder and rkmessage_ is set to point to it. */
-    rd_kafka_message_t rkmessage_err_;
+    ErrorCode err_;
 }
