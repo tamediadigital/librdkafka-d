@@ -7,7 +7,10 @@
 	"copyright": "Copyright © 2016, Tamedia AG",
 	"license": "BSL-1.0",
 	"dependencies":{
-		"vibe-d": "~>0.7.30",
+		"vibe-d": "~>0.8.0-beta.5",
 		"librdkafka-d": {"path" : "../../"}
+	},
+	"subConfigurations": {
+		"vibe-d": "vibe-core"
 	}
 }

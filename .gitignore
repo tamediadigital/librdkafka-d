@@ -21,3 +21,5 @@ librdkafka-d-test-default
 untitled.sublime-workspace
 
 examples/producer_vibed/producer_vibed
+
+examples/consumer_vibed/consumer_vibed
